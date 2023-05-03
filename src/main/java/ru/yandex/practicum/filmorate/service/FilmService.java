@@ -29,7 +29,7 @@ public class FilmService {
     }
 
     public Collection<Film> getPopular(long count) {
-        return filmStorage.getAll().stream()
+        return getAll().stream()
                 .sorted(Comparator.comparingInt(i -> -i.getLikedUsersIds().size()))
                 .limit(count)
                 .collect(Collectors.toList());
@@ -48,14 +48,16 @@ public class FilmService {
     }
 
     public void addLike(long id, long userId) {
-        Film film = filmStorage.get(id);
+        Film film = get(id);
         User user = userStorage.get(userId);
 
         film.getLikedUsersIds().add(user.getId());
+
+        log.debug("Добавлен лайк фильму {} от пользователя {}", id, userId);
     }
 
     public void deleteLike(long id, long userId) {
-        Film film = filmStorage.get(id);
+        Film film = get(id);
         User user = userStorage.get(userId);
 
         if (!film.getLikedUsersIds().contains(userId)) {
@@ -64,5 +66,7 @@ public class FilmService {
         }
 
         film.getLikedUsersIds().remove(user.getId());
+
+        log.debug("Удален лайк фильму {} от пользователя {}", id, userId);
     }
 }

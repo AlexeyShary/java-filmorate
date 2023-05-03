@@ -45,14 +45,10 @@ public class UserService {
     }
 
     public void addToFriends(long id, long friendId) {
-        if (getAll().stream().noneMatch(user -> user.getId() == id)) {
-            log.warn("Ошибка про добавлении пользователей в друзья - пользователь с ID {} не найден", id);
-            throw new IncorrectIdException("Не найден пользователь с ID " + id);
-        }
-
-        if (getAll().stream().noneMatch(user -> user.getId() == id)) {
-            log.warn("Ошибка про добавлении пользователей в друзья - пользователь с ID {} не найден", id);
-            throw new IncorrectIdException("Не найден пользователь с ID " + id);
+        if ((getAll().stream().noneMatch(user -> user.getId() == id))
+                || (getAll().stream().noneMatch(user -> user.getId() == friendId))) {
+            log.warn("Ошибка про добавлении пользователей в друзья - пользователь с ID {} или {} не найден", id, friendId);
+            throw new IncorrectIdException("Не найден пользователь с ID " + id + " или" + friendId);
         }
 
         User user1 = userStorage.get(id);

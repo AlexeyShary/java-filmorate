@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.ErrorResponse;
 
-@RestControllerAdvice(basePackages = "ru.yandex.practicum.filmorate")
+@RestControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
