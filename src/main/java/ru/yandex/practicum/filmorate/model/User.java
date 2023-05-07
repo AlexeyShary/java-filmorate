@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import ru.yandex.practicum.filmorate.validation.NoSpaces;
 
 import javax.validation.constraints.Email;
@@ -12,7 +11,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@EqualsAndHashCode
 public class User {
     private long id;
     @Email(message = "E-mail должен быть корректным.")
