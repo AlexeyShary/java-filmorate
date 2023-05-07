@@ -47,7 +47,7 @@ public class UserService {
     public void addToFriends(long id, long friendId) {
         if ((getAll().stream().noneMatch(user -> user.getId() == id))
                 || (getAll().stream().noneMatch(user -> user.getId() == friendId))) {
-            log.warn("Ошибка про добавлении пользователей в друзья - пользователь с ID {} или {} не найден", id, friendId);
+            log.warn("Ошибка при добавлении пользователей в друзья - пользователь с ID {} или {} не найден", id, friendId);
             throw new IncorrectIdException("Не найден пользователь с ID " + id + " или" + friendId);
         }
 
