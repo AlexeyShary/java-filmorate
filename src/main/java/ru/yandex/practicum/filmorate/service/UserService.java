@@ -1,47 +1,90 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
-@Component
+@Service
+@RequiredArgsConstructor
 public class UserService {
-    private int id = 1;
-    private final Map<Integer, User> users = new HashMap<>();
+    private final UserStorage userStorage;
 
-    public Collection<User> getAllUsers() {
-        return users.values();
+    public Collection<User> getAll() {
+        return userStorage.getAll();
     }
 
-    public User createUser(User user) {
+    public User get(long id) {
+        return userStorage.get(id);
+    }
+
+    public User create(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
 
-        user.setId(id++);
-        users.put(user.getId(), user);
-        log.debug("Добавлен пользователь ID {}", user.getId());
-        return user;
+        return userStorage.create(user);
     }
 
-    public User updateUser(User user) {
-        if (!users.containsKey(user.getId())) {
-            log.warn("Попытка обновить пользователя с ID {}, которого не существует", user.getId());
-            throw new ValidationException();
-        }
-
+    public User update(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
 
-        users.put(user.getId(), user);
-        log.debug("Обновлен пользователь ID {}", user.getId());
-        return user;
+        return userStorage.update(user);
+    }
+
+    public long delete(long id) {
+        return userStorage.delete(id);
+    }
+
+    public void addToFriends(long id, long friendId) {
+        if ((getAll().stream().noneMatch(user -> user.getId() == id))
+                || (getAll().stream().noneMatch(user -> user.getId() == friendId))) {
+            log.warn("Ошибка при добавлении пользователей в друзья - пользователь с ID {} или {} не найден", id, friendId);
+            throw new IncorrectIdException("Не найден пользователь с ID " + id + " или" + friendId);
+        }
+
+        User user1 = userStorage.get(id);
+        User user2 = userStorage.get(friendId);
+
+        user1.getFriendsIds().add(friendId);
+        user2.getFriendsIds().add(id);
+
+        log.debug("Пользователи ID {} и {} добавлены в друзья друг к другу", id, friendId);
+    }
+
+    public void deleteFromFriends(long id, long friendId) {
+        User user1 = userStorage.get(id);
+        User user2 = userStorage.get(friendId);
+
+        if (user1.getFriendsIds().stream().noneMatch(uId -> uId == friendId)
+                || user2.getFriendsIds().stream().noneMatch(uId -> uId == id)) {
+            log.warn("Ошибка про удалении пользователя из друзей - пользователь с ID {} не в друзьях у {}", id, friendId);
+            throw new IncorrectIdException("Пользователи ID " + id + " и " + friendId + " не добавлены в друзья");
+        }
+
+        user1.getFriendsIds().remove(friendId);
+        user2.getFriendsIds().remove(id);
+
+        log.debug("Пользователи ID {} и {} удалены из друзей друг от друга", id, friendId);
+    }
+
+    public Collection<User> getFriends(long id) {
+        return userStorage.get(id).getFriendsIds().stream()
+                .map(userStorage::get)
+                .collect(Collectors.toList());
+    }
+
+    public Collection<User> getCommonFriends(long id, long otherId) {
+        Collection<User> commonFriendList = getFriends(id);
+        commonFriendList.retainAll(getFriends(otherId));
+        return commonFriendList;
     }
 }
