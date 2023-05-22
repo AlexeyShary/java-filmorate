@@ -36,8 +36,7 @@ public class UserDbStorage implements UserStorage {
                 " FROM USERS WHERE USER_ID = ?";
         try {
             return jdbcTemplate.queryForObject(q, new UserMapper(), id);
-        }
-        catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             log.warn("Ошибка про запросе - пользователь с ID {} не найден", id);
             throw new IncorrectIdException("Не найден пользователь с ID " + id);
         }

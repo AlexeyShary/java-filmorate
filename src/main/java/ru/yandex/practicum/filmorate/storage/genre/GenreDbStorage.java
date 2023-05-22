@@ -32,8 +32,7 @@ public class GenreDbStorage implements GenreStorage {
                 " FROM GENRES WHERE GENRE_ID = ?";
         try {
             return jdbcTemplate.queryForObject(q, new GenreDbStorage.GenreMapper(), id);
-        }
-        catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             log.warn("Ошибка про запросе - жанр с ID {} не найден", id);
             throw new IncorrectIdException("Не найден жанр с ID " + id);
         }

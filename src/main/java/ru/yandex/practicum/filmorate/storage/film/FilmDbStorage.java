@@ -41,8 +41,7 @@ public class FilmDbStorage implements FilmStorage {
                 " FROM FILMS WHERE FILM_ID = ?";
         try {
             return jdbcTemplate.queryForObject(q, new FilmMapper(), id);
-        }
-        catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             log.warn("Ошибка про запросе - фильм с ID {} не найден", id);
             throw new IncorrectIdException("Не найден фильм с ID " + id);
         }
