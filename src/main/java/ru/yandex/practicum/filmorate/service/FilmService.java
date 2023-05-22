@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -17,7 +18,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class FilmService {
+    @Qualifier("filmDbStorage")
     private final FilmStorage filmStorage;
+
+    @Qualifier("userDbStorage")
     private final UserStorage userStorage;
 
     public Collection<Film> getAll() {
@@ -43,8 +47,8 @@ public class FilmService {
         return filmStorage.update(film);
     }
 
-    public long delete(long id) {
-        return filmStorage.delete(id);
+    public void delete(long id) {
+        filmStorage.delete(id);
     }
 
     public void addLike(long id, long userId) {
@@ -52,6 +56,8 @@ public class FilmService {
         User user = userStorage.get(userId);
 
         film.getLikedUsersIds().add(user.getId());
+
+        update(film);
 
         log.debug("Добавлен лайк фильму {} от пользователя {}", id, userId);
     }
@@ -66,6 +72,8 @@ public class FilmService {
         }
 
         film.getLikedUsersIds().remove(user.getId());
+
+        update(film);
 
         log.debug("Удален лайк фильму {} от пользователя {}", id, userId);
     }

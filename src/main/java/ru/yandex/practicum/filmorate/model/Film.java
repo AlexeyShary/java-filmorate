@@ -8,6 +8,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Data
@@ -22,4 +23,6 @@ public class Film {
     @Positive(message = "Длительность фильма должна быть положительной.")
     private Integer duration;
     private Set<Long> likedUsersIds = new HashSet<>();
+    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
+    private Mpa mpa;
 }

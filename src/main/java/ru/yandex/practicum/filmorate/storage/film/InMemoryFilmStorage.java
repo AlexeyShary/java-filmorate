@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-@Component
+@Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
     private int id = 1;
     private final Map<Long, Film> films = new HashMap<>();
@@ -39,7 +39,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public long delete(long id) {
+    public void delete(long id) {
         if (!films.containsKey(id)) {
             log.warn("Ошибка про удалении - фильм с ID {} не найден", id);
             throw new IncorrectIdException("Не найден фильм с ID " + id);
@@ -47,7 +47,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
         films.remove(id);
         log.debug("Удален фильм ID {}", id);
-        return id;
     }
 
     @Override

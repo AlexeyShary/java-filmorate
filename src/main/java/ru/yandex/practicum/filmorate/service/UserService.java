@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+    @Qualifier("userDbStorage")
     private final UserStorage userStorage;
 
     public Collection<User> getAll() {
@@ -40,8 +42,8 @@ public class UserService {
         return userStorage.update(user);
     }
 
-    public long delete(long id) {
-        return userStorage.delete(id);
+    public void delete(long id) {
+        userStorage.delete(id);
     }
 
     public void addToFriends(long id, long friendId) {
@@ -51,27 +53,23 @@ public class UserService {
             throw new IncorrectIdException("Не найден пользователь с ID " + id + " или" + friendId);
         }
 
-        User user1 = userStorage.get(id);
-        User user2 = userStorage.get(friendId);
+        User user = userStorage.get(id);
+        user.getFriendsIds().add(friendId);
+        update(user);
 
-        user1.getFriendsIds().add(friendId);
-        user2.getFriendsIds().add(id);
-
-        log.debug("Пользователи ID {} и {} добавлены в друзья друг к другу", id, friendId);
+        log.debug("Пользователь ID {} добавил в друзья пользователя {}", id, friendId);
     }
 
     public void deleteFromFriends(long id, long friendId) {
-        User user1 = userStorage.get(id);
-        User user2 = userStorage.get(friendId);
+        User user = userStorage.get(id);
 
-        if (user1.getFriendsIds().stream().noneMatch(uId -> uId == friendId)
-                || user2.getFriendsIds().stream().noneMatch(uId -> uId == id)) {
-            log.warn("Ошибка про удалении пользователя из друзей - пользователь с ID {} не в друзьях у {}", id, friendId);
+        if (user.getFriendsIds().stream().noneMatch(uId -> uId == friendId)) {
+            log.warn("Ошибка про удалении пользователя из друзей - пользователь с ID {} не в друзьях у {}", friendId, id);
             throw new IncorrectIdException("Пользователи ID " + id + " и " + friendId + " не добавлены в друзья");
         }
 
-        user1.getFriendsIds().remove(friendId);
-        user2.getFriendsIds().remove(id);
+        user.getFriendsIds().remove(friendId);
+        update(user);
 
         log.debug("Пользователи ID {} и {} удалены из друзей друг от друга", id, friendId);
     }
