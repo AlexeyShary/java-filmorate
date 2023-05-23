@@ -8,10 +8,10 @@ import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -24,6 +24,9 @@ public class FilmService {
     @Qualifier("userDbStorage")
     private final UserStorage userStorage;
 
+    @Qualifier("likesDbStorage")
+    private final LikesStorage likesStorage;
+
     public Collection<Film> getAll() {
         return filmStorage.getAll();
     }
@@ -33,9 +36,14 @@ public class FilmService {
     }
 
     public Collection<Film> getPopular(long count) {
+        /*
         return getAll().stream()
                 .sorted(Comparator.comparingInt(i -> -i.getLikedUsersIds().size()))
                 .limit(count)
+                .collect(Collectors.toList());*/
+
+        return likesStorage.getPopularFilmsIds(count).stream()
+                .map(filmStorage::get)
                 .collect(Collectors.toList());
     }
 
@@ -57,7 +65,7 @@ public class FilmService {
 
         film.getLikedUsersIds().add(user.getId());
 
-        update(film);
+        likesStorage.addLike(userId, id);
 
         log.debug("Добавлен лайк фильму {} от пользователя {}", id, userId);
     }
@@ -71,9 +79,7 @@ public class FilmService {
             throw new IncorrectIdException("Пользователь с ID " + userId + " не лайкал фильм " + id);
         }
 
-        film.getLikedUsersIds().remove(user.getId());
-
-        update(film);
+        likesStorage.deleteLike(userId, id);
 
         log.debug("Удален лайк фильму {} от пользователя {}", id, userId);
     }

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -9,12 +10,12 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.friends.FriendsStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -22,6 +23,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
+
+    @Qualifier("friendsDbStorage")
+    private final FriendsStorage friendsStorage;
 
     @Override
     public Collection<User> getAll() {
@@ -85,14 +89,6 @@ public class UserDbStorage implements UserStorage {
                 user.getBirthday(),
                 user.getId());
 
-        String deleteQuery = "DELETE FROM USERS_FRIENDSHIP WHERE USER_FROM = ?";
-        jdbcTemplate.update(deleteQuery, user.getId());
-
-        String insertQuery = "INSERT INTO USERS_FRIENDSHIP (USER_FROM, USER_TO) VALUES (?, ?)";
-        for (Long friendId : user.getFriendsIds()) {
-            jdbcTemplate.update(insertQuery, user.getId(), friendId);
-        }
-
         return user;
     }
 
@@ -106,9 +102,7 @@ public class UserDbStorage implements UserStorage {
             user.setName(rs.getString("USER_NAME"));
             user.setBirthday(rs.getDate("BIRTHDAY").toLocalDate());
 
-            String q = "SELECT USER_TO FROM USERS_FRIENDSHIP WHERE USER_FROM = ?";
-            List<Long> ids = jdbcTemplate.queryForList(q, Long.class, user.getId());
-            user.getFriendsIds().addAll(ids);
+            user.getFriendsIds().addAll(friendsStorage.getFriendsIds(user.getId()));
 
             return user;
         }

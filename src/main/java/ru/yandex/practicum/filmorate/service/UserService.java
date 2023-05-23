@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.friends.FriendsStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
@@ -17,6 +18,9 @@ import java.util.stream.Collectors;
 public class UserService {
     @Qualifier("userDbStorage")
     private final UserStorage userStorage;
+
+    @Qualifier("friendsDbStorage")
+    private final FriendsStorage friendsStorage;
 
     public Collection<User> getAll() {
         return userStorage.getAll();
@@ -53,36 +57,24 @@ public class UserService {
             throw new IncorrectIdException("Не найден пользователь с ID " + id + " или" + friendId);
         }
 
-        User user = userStorage.get(id);
-        user.getFriendsIds().add(friendId);
-        update(user);
-
+        friendsStorage.addToFriends(id, friendId);
         log.debug("Пользователь ID {} добавил в друзья пользователя {}", id, friendId);
     }
 
     public void deleteFromFriends(long id, long friendId) {
-        User user = userStorage.get(id);
-
-        if (user.getFriendsIds().stream().noneMatch(uId -> uId == friendId)) {
-            log.warn("Ошибка про удалении пользователя из друзей - пользователь с ID {} не в друзьях у {}", friendId, id);
-            throw new IncorrectIdException("Пользователи ID " + id + " и " + friendId + " не добавлены в друзья");
-        }
-
-        user.getFriendsIds().remove(friendId);
-        update(user);
-
-        log.debug("Пользователи ID {} и {} удалены из друзей друг от друга", id, friendId);
+        friendsStorage.deleteFromFriends(id, friendId);
+        log.debug("Пользователи ID {} удалил из друзей пользователя {}", id, friendId);
     }
 
     public Collection<User> getFriends(long id) {
-        return userStorage.get(id).getFriendsIds().stream()
+        return friendsStorage.getFriendsIds(id).stream()
                 .map(userStorage::get)
                 .collect(Collectors.toList());
     }
 
     public Collection<User> getCommonFriends(long id, long otherId) {
-        Collection<User> commonFriendList = getFriends(id);
-        commonFriendList.retainAll(getFriends(otherId));
-        return commonFriendList;
+        return friendsStorage.getCommonFriendsIds(id, otherId).stream()
+                .map(userStorage::get)
+                .collect(Collectors.toList());
     }
 }

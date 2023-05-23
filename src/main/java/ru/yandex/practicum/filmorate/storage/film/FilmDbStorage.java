@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -10,8 +11,9 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
-import ru.yandex.practicum.filmorate.storage.mpa.MpaDbStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,8 +27,15 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final MpaDbStorage mpaDbStorage;
-    private final GenreDbStorage genreDbStorage;
+
+    @Qualifier("mpaDbStorage")
+    private final MpaStorage mpaStorage;
+
+    @Qualifier("genreDbStorage")
+    private final GenreStorage genreStorage;
+
+    @Qualifier("likesDbStorage")
+    private final LikesStorage likesStorage;
 
     @Override
     public Collection<Film> getAll() {
@@ -95,7 +104,6 @@ public class FilmDbStorage implements FilmStorage {
                 film.getId());
 
         updateGenresSubtable(film);
-        updateLikesSubtable(film);
 
         return film;
     }
@@ -110,16 +118,6 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-    private void updateLikesSubtable(Film film) {
-        String deleteLikesQuery = "DELETE FROM USERS_FILMS_LIKES WHERE FILM_ID = ?";
-        jdbcTemplate.update(deleteLikesQuery, film.getId());
-
-        String insertLikesQuery = "INSERT INTO USERS_FILMS_LIKES (USER_ID, FILM_ID) VALUES (?, ?)";
-        for (Long likedUserId : film.getLikedUsersIds()) {
-            jdbcTemplate.update(insertLikesQuery, likedUserId, film.getId());
-        }
-    }
-
     private class FilmMapper implements RowMapper<Film> {
         @Override
         public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -129,16 +127,13 @@ public class FilmDbStorage implements FilmStorage {
             film.setDescription(rs.getString("DESCRIPTION"));
             film.setReleaseDate(rs.getDate("RELEASE_DATE").toLocalDate());
             film.setDuration(rs.getInt("DURATION"));
-            film.setMpa(mpaDbStorage.get(rs.getLong("MPA_ID")));
-
-            String likesQuery = "SELECT USER_ID FROM USERS_FILMS_LIKES WHERE FILM_ID = ?";
-            List<Long> likedUsersIds = jdbcTemplate.queryForList(likesQuery, Long.class, film.getId());
-            film.getLikedUsersIds().addAll(likedUsersIds);
+            film.setMpa(mpaStorage.get(rs.getLong("MPA_ID")));
+            film.getLikedUsersIds().addAll(likesStorage.getLikedUsersIds(film.getId()));
 
             String genresQuery = "SELECT GENRE_ID FROM FILMS_GENRES WHERE FILM_ID = ?";
             List<Long> genresIds = jdbcTemplate.queryForList(genresQuery, Long.class, film.getId());
             for (Long genreId : genresIds) {
-                film.getGenres().add(genreDbStorage.get(genreId));
+                film.getGenres().add(genreStorage.get(genreId));
             }
 
             return film;

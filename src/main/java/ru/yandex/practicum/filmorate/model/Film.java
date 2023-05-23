@@ -1,14 +1,17 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonSetter;
-import lombok.*;
+import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 import ru.yandex.practicum.filmorate.validation.ReleaseDate;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Data
 public class Film {
