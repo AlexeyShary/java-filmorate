@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@Component("filmDbStorage")
+@Component
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;

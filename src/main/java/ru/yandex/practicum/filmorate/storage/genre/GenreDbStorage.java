@@ -14,7 +14,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 @Slf4j
-@Component("genreDbStorage")
+@Component
 @RequiredArgsConstructor
 public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;

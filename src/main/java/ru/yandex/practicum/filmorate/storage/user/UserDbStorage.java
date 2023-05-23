@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@Component("userDbStorage")
+@Component
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
