@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.genre;
 
-import ch.qos.logback.classic.spi.IThrowableProxy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
