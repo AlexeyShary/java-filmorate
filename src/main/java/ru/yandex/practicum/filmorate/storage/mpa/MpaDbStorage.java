@@ -38,7 +38,7 @@ public class MpaDbStorage implements MpaStorage {
         }
     }
 
-    private class MpaMapper implements RowMapper<Mpa> {
+    private static class MpaMapper implements RowMapper<Mpa> {
         @Override
         public Mpa mapRow(ResultSet rs, int rowNum) throws SQLException {
             Mpa mpa = new Mpa();
