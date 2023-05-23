@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.genre;
 
+import ch.qos.logback.classic.spi.IThrowableProxy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -33,8 +34,8 @@ public class GenreDbStorage implements GenreStorage {
         try {
             return jdbcTemplate.queryForObject(q, new GenreDbStorage.GenreMapper(), id);
         } catch (EmptyResultDataAccessException e) {
-            log.warn("Ошибка про запросе - жанр с ID {} не найден", id);
-            throw new IncorrectIdException("Не найден жанр с ID " + id);
+            log.error("Ошибка при запросе жанра с ID {}. " + e.getMessage(), id);
+            throw new IncorrectIdException(String.format("Ошибка при запросе жанра с ID {}. " + e.getMessage(), id));
         }
     }
 

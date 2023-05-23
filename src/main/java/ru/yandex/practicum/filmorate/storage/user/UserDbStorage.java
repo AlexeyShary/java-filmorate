@@ -37,8 +37,8 @@ public class UserDbStorage implements UserStorage {
         try {
             return jdbcTemplate.queryForObject(q, new UserMapper(), id);
         } catch (EmptyResultDataAccessException e) {
-            log.warn("Ошибка про запросе - пользователь с ID {} не найден", id);
-            throw new IncorrectIdException("Не найден пользователь с ID " + id);
+            log.error("Ошибка при запросе пользователя с ID {}. " + e.getMessage(), id);
+            throw new IncorrectIdException(String.format("Ошибка при запросе пользователя с ID {}. " + e.getMessage(), id));
         }
     }
 
@@ -72,8 +72,8 @@ public class UserDbStorage implements UserStorage {
         try {
             jdbcTemplate.queryForObject("SELECT USER_ID FROM USERS WHERE USER_ID = ?", Long.class, user.getId());
         } catch (EmptyResultDataAccessException e) {
-            log.warn("Ошибка про обновлении - пользователь с ID {} не найден", user.getId());
-            throw new IncorrectIdException("Не найден пользователь с ID " + user.getId());
+            log.error("Ошибка при обновления пользователя с ID {}. " + e.getMessage(), user.getId());
+            throw new IncorrectIdException(String.format("Ошибка при обновления пользователя с ID {}. " + e.getMessage(), user.getId()));
         }
 
         String updateQuery = "UPDATE USERS SET EMAIL = ?, LOGIN = ?, USER_NAME = ?, BIRTHDAY = ? WHERE USER_ID = ?";

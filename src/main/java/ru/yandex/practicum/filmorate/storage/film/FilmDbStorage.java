@@ -42,8 +42,8 @@ public class FilmDbStorage implements FilmStorage {
         try {
             return jdbcTemplate.queryForObject(q, new FilmMapper(), id);
         } catch (EmptyResultDataAccessException e) {
-            log.warn("Ошибка про запросе - фильм с ID {} не найден", id);
-            throw new IncorrectIdException("Не найден фильм с ID " + id);
+            log.error("Ошибка при запросе фильма с ID {}. " + e.getMessage(), id);
+            throw new IncorrectIdException(String.format("Ошибка при запросе фильма с ID {}. " + e.getMessage(), id));
         }
     }
 
@@ -80,8 +80,8 @@ public class FilmDbStorage implements FilmStorage {
         try {
             jdbcTemplate.queryForObject("SELECT FILM_ID FROM FILMS WHERE FILM_ID = ?", Long.class, film.getId());
         } catch (EmptyResultDataAccessException e) {
-            log.warn("Ошибка про обновлении - фильм с ID {} не найден", film.getId());
-            throw new IncorrectIdException("Не найден фильм с ID " + film.getId());
+            log.error("Ошибка при обновлении фильма с ID {}. " + e.getMessage(), film.getId());
+            throw new IncorrectIdException(String.format("Ошибка при обновлении фильма с ID {}. " + e.getMessage(), film.getId()));
         }
 
         String updateQuery = "UPDATE FILMS SET FILM_NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, MPA_ID = ? WHERE FILM_ID = ?";
