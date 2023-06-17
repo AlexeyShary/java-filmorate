@@ -24,7 +24,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public long delete(long id) {
+    public void delete(long id) {
         if (!users.containsKey(id)) {
             log.warn("Ошибка про удалении - пользователь с ID {} не найден", id);
             throw new IncorrectIdException("Не найден пользователь с ID " + id);
@@ -32,7 +32,6 @@ public class InMemoryUserStorage implements UserStorage {
 
         users.remove(id);
         log.debug("Удален пользователь ID {}", id);
-        return id;
     }
 
     @Override

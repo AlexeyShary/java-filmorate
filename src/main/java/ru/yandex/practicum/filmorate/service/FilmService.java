@@ -2,23 +2,30 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class FilmService {
+    @Qualifier("filmDbStorage")
     private final FilmStorage filmStorage;
+
+    @Qualifier("userDbStorage")
     private final UserStorage userStorage;
+
+    @Qualifier("likesDbStorage")
+    private final LikesStorage likesStorage;
 
     public Collection<Film> getAll() {
         return filmStorage.getAll();
@@ -29,9 +36,14 @@ public class FilmService {
     }
 
     public Collection<Film> getPopular(long count) {
+        /*
         return getAll().stream()
                 .sorted(Comparator.comparingInt(i -> -i.getLikedUsersIds().size()))
                 .limit(count)
+                .collect(Collectors.toList());*/
+
+        return likesStorage.getPopularFilmsIds(count).stream()
+                .map(filmStorage::get)
                 .collect(Collectors.toList());
     }
 
@@ -43,8 +55,8 @@ public class FilmService {
         return filmStorage.update(film);
     }
 
-    public long delete(long id) {
-        return filmStorage.delete(id);
+    public void delete(long id) {
+        filmStorage.delete(id);
     }
 
     public void addLike(long id, long userId) {
@@ -52,6 +64,8 @@ public class FilmService {
         User user = userStorage.get(userId);
 
         film.getLikedUsersIds().add(user.getId());
+
+        likesStorage.addLike(userId, id);
 
         log.debug("Добавлен лайк фильму {} от пользователя {}", id, userId);
     }
@@ -65,7 +79,7 @@ public class FilmService {
             throw new IncorrectIdException("Пользователь с ID " + userId + " не лайкал фильм " + id);
         }
 
-        film.getLikedUsersIds().remove(user.getId());
+        likesStorage.deleteLike(userId, id);
 
         log.debug("Удален лайк фильму {} от пользователя {}", id, userId);
     }
