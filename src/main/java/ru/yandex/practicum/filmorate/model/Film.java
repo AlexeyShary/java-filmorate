@@ -8,10 +8,7 @@ import ru.yandex.practicum.filmorate.validation.ReleaseDate;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 @Data
 public class Film {
@@ -27,7 +24,7 @@ public class Film {
     private Set<Long> likedUsersIds = new HashSet<>();
     private Set<Genre> genres = new TreeSet<>(Comparator.comparingLong(Genre::getId));
     private Mpa mpa;
-    private Set<Director> directors = new HashSet<>();
+    private List<Director> directors = new ArrayList<>();
 
     @JsonSetter
     public void setGenres(Set<Genre> genres) {
