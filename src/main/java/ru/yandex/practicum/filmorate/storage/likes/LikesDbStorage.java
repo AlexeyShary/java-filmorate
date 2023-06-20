@@ -40,7 +40,7 @@ public class LikesDbStorage implements LikesStorage {
     }
 
     @Override
-    public Collection<Long> getCommonFilms(long userId, long friendId) {
+    public Collection<Long> getCommonFilmsIds(long userId, long friendId) {
         String q = "SELECT FILM_ID" +
                 " FROM USERS_FILMS_LIKES" +
                 " WHERE USER_ID = ?" +

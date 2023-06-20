@@ -52,8 +52,8 @@ class LikesDbStorageTest {
     }
 
     @Test
-    void getCommonFilms() {
-        assertThat(likesDbStorage.getCommonFilms(1, 2)
+    void getCommonFilmsIds() {
+        assertThat(likesDbStorage.getCommonFilmsIds(1, 2)
                 .containsAll(Arrays.asList(2L, 3L)));
     }
 }

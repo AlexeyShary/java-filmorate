@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -36,8 +35,8 @@ public class FilmService {
         return filmStorage.get(id);
     }
 
-    public List<Film> getCommonFilms(long userId, long friendId) {
-        return likesStorage.getCommonFilms(userId, friendId).stream()
+    public Collection<Film> getCommonFilms(long userId, long friendId) {
+        return likesStorage.getCommonFilmsIds(userId, friendId).stream()
                 .map(filmStorage::get)
                 .collect(Collectors.toList());
     }
