@@ -22,10 +22,7 @@ import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -106,10 +103,12 @@ public class FilmDbStorage implements FilmStorage {
             jdbcTemplate.queryForObject("SELECT FILM_ID FROM FILMS WHERE FILM_ID = ?", Long.class, film.getId());
         } catch (EmptyResultDataAccessException e) {
             log.error("Ошибка при обновлении фильма с ID {}. " + e.getMessage(), film.getId());
-            throw new IncorrectIdException(String.format("Ошибка при обновлении фильма с ID {}. " + e.getMessage(), film.getId()));
+            throw new IncorrectIdException(String.format("Ошибка при обновлении фильма с ID {}. " + e.getMessage(),
+                    film.getId()));
         }
 
-        String updateQuery = "UPDATE FILMS SET FILM_NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, MPA_ID = ? WHERE FILM_ID = ?";
+        String updateQuery = "UPDATE FILMS SET FILM_NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?," +
+                " DURATION = ?, MPA_ID = ? WHERE FILM_ID = ?";
 
         jdbcTemplate.update(updateQuery,
                 film.getName(),
@@ -123,6 +122,38 @@ public class FilmDbStorage implements FilmStorage {
         updateDirectorsSubtable(film);
 
         return film;
+    }
+
+    @Override
+    public Collection<Film> getDirectorFilmsSorted(long directorId, String sortBy) {
+        String sortByYearQuery = "SELECT f.*, m.MPA_NAME" +
+                " FROM FILMS_DIRECTORS fd" +
+                " JOIN FILMS f ON fd.FILM_ID = f.FILM_ID" +
+                " JOIN MPA m ON f.MPA_ID = m.MPA_ID" +
+                " WHERE DIRECTOR_ID = ?" +
+                " ORDER BY YEAR(f.RELEASE_DATE)";
+
+        String sortByLikesQuery = "SELECT f.*, m.MPA_NAME," +
+                " (SELECT COUNT(*) FROM USERS_FILMS_LIKES ufl WHERE fd.FILM_ID = ufl.FILM_ID) AS LIKES" +
+                " FROM FILMS_DIRECTORS fd" +
+                " JOIN FILMS f ON fd.FILM_ID = f.FILM_ID" +
+                " JOIN MPA m ON f.MPA_ID = m.MPA_ID" +
+                " WHERE DIRECTOR_ID = ?" +
+                " ORDER BY LIKES DESC";
+
+        Collection<Film> films = new ArrayList<>();
+
+        if (sortBy.equals("year")) {
+            films = jdbcTemplate.query(sortByYearQuery, new FilmMapper(), directorId);
+        } else if (sortBy.equals("likes")) {
+            films = jdbcTemplate.query(sortByLikesQuery, new FilmMapper(), directorId);
+        }
+
+        if (films.isEmpty()) {
+            throw new IncorrectIdException("Режиссер с ID " + directorId + " не найден.");
+        }
+
+        return films;
     }
 
     private void updateGenresSubtable(Film film) {
