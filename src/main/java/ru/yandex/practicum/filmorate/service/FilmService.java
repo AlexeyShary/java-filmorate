@@ -83,4 +83,8 @@ public class FilmService {
 
         log.debug("Удален лайк фильму {} от пользователя {}", id, userId);
     }
+
+    public Collection<Film> getDirectorFilmsSorted(long directorId, String sortBy) {
+        return filmStorage.getDirectorFilmsSorted(directorId, sortBy);
+    }
 }
