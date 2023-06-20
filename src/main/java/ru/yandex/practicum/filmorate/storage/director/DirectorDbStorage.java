@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -30,14 +31,14 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
-    public Director get(long id) {
+    public Optional<Director> get(long id) {
         String q = "SELECT DIRECTOR_ID, DIRECTOR_NAME" +
                 " FROM DIRECTORS WHERE DIRECTOR_ID = ?";
         try {
-            return jdbcTemplate.queryForObject(q, new DirectorMapper(), id);
+            return Optional.ofNullable(jdbcTemplate.queryForObject(q, new DirectorMapper(), id));
         } catch (EmptyResultDataAccessException e) {
             log.error("Ошибка при запросе режиссера с ID {}. " + e.getMessage(), id);
-            throw new IncorrectIdException(String.format("Ошибка при запросе режиссера с ID {}. " + e.getMessage(), id));
+            return Optional.empty();
         }
     }
 
@@ -83,7 +84,7 @@ public class DirectorDbStorage implements DirectorStorage {
         return director;
     }
 
-    private static class DirectorMapper implements RowMapper<Director> {
+    public static class DirectorMapper implements RowMapper<Director> {
         @Override
         public Director mapRow(ResultSet rs, int rowNum) throws SQLException {
             Director director = new Director();

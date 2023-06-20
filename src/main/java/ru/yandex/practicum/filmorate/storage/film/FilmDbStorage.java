@@ -12,8 +12,10 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
@@ -87,6 +89,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setId(filmId.longValue());
 
         updateGenresSubtable(film);
+        updateDirectorsSubtable(film);
 
         return film;
     }
@@ -117,6 +120,7 @@ public class FilmDbStorage implements FilmStorage {
                 film.getId());
 
         updateGenresSubtable(film);
+        updateDirectorsSubtable(film);
 
         return film;
     }
@@ -128,6 +132,16 @@ public class FilmDbStorage implements FilmStorage {
         String insertGenresQuery = "INSERT INTO FILMS_GENRES (FILM_ID, GENRE_ID) VALUES (?, ?)";
         for (Genre genre : film.getGenres()) {
             jdbcTemplate.update(insertGenresQuery, film.getId(), genre.getId());
+        }
+    }
+
+    private void updateDirectorsSubtable(Film film) {
+        String deleteDirectorsQuery = "DELETE FROM FILMS_DIRECTORS WHERE FILM_ID = ?";
+        jdbcTemplate.update(deleteDirectorsQuery, film.getId());
+
+        String insertDirectorsQuery = "INSERT INTO FILMS_DIRECTORS (FILM_ID, DIRECTOR_ID) VALUES (?, ?)";
+        for (Director director : film.getDirectors()) {
+            jdbcTemplate.update(insertDirectorsQuery, film.getId(), director.getId());
         }
     }
 
@@ -148,6 +162,14 @@ public class FilmDbStorage implements FilmStorage {
             for (Long genreId : genresIds) {
                 film.getGenres().add(genreStorage.get(genreId));
             }
+
+            String directorsQuery = "SELECT d.*" +
+                    " FROM DIRECTORS d" +
+                    " JOIN FILMS_DIRECTORS fd ON d.DIRECTOR_ID = fd.DIRECTOR_ID" +
+                    " WHERE FILM_ID = ?";
+            List<Director> directors = jdbcTemplate.query(directorsQuery,
+                    new DirectorDbStorage.DirectorMapper(), rs.getLong("FILM_ID"));
+            film.setDirectors(directors);
 
             return film;
         }

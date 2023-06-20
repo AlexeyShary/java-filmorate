@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 
@@ -18,7 +19,8 @@ public class DirectorService {
 
     public Collection<Director> getAll() { return directorStorage.getAll(); }
 
-    public Director get(long id) { return directorStorage.get(id); }
+    public Director get(long id) { return directorStorage.get(id).orElseThrow(() ->
+            new IncorrectIdException("Ошибка при запросе фильма с ID " + id)); }
 
     public Director create(Director director) { return directorStorage.create(director); }
 
