@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.storage.friends.FriendsStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -63,12 +64,13 @@ public class UserService {
 
     public void deleteFromFriends(long id, long friendId) {
         friendsStorage.deleteFromFriends(id, friendId);
-        log.debug("Пользователи ID {} удалил из друзей пользователя {}", id, friendId);
+        log.debug("Пользователь ID {} удалил из друзей пользователя {}", id, friendId);
     }
 
     public Collection<User> getFriends(long id) {
-        return friendsStorage.getFriendsIds(id).stream()
-                .map(userStorage::get)
+        get(id);
+        return friendsStorage.getFriendsIds(id)
+                .stream().map(userStorage::get)
                 .collect(Collectors.toList());
     }
 
