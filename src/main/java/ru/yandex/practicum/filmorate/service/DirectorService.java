@@ -17,14 +17,24 @@ public class DirectorService {
     @Qualifier("directorDbStorage")
     private final DirectorStorage directorStorage;
 
-    public Collection<Director> getAll() { return directorStorage.getAll(); }
+    public Collection<Director> getAll() {
+        return directorStorage.getAll();
+    }
 
-    public Director get(long id) { return directorStorage.get(id).orElseThrow(() ->
-            new IncorrectIdException("Ошибка при запросе фильма с ID " + id)); }
+    public Director get(long id) {
+        return directorStorage.get(id).orElseThrow(() ->
+                new IncorrectIdException("Ошибка при запросе фильма с ID " + id));
+    }
 
-    public Director create(Director director) { return directorStorage.create(director); }
+    public Director create(Director director) {
+        return directorStorage.create(director);
+    }
 
-    public void delete(long id) { directorStorage.delete(id); }
+    public void delete(long id) {
+        directorStorage.delete(id);
+    }
 
-    public Director update(Director director) { return directorStorage.update(director); }
+    public Director update(Director director) {
+        return directorStorage.update(director);
+    }
 }
