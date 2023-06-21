@@ -17,10 +17,7 @@ import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -106,6 +103,12 @@ public class FilmDbStorage implements FilmStorage {
         updateGenresSubtable(film);
 
         return film;
+    }
+
+    @Override
+    public List<Long> getUsersLikedFilmsIds(long userId) {
+        String query = "SELECT FILM_ID FROM USERS_FILMS_LIKES WHERE USER_ID = ?";
+        return jdbcTemplate.query(query, (rs, rowNum) -> rs.getLong("FILM_ID"), userId);
     }
 
     private void updateGenresSubtable(Film film) {
