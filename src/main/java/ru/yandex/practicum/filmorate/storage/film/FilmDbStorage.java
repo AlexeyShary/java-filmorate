@@ -156,6 +156,12 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
+    @Override
+    public List<Long> getUsersLikedFilmsIds(long userId) {
+        String query = "SELECT FILM_ID FROM USERS_FILMS_LIKES WHERE USER_ID = ?";
+        return jdbcTemplate.query(query, (rs, rowNum) -> rs.getLong("FILM_ID"), userId);
+    }
+
     private void updateGenresSubtable(Film film) {
         String deleteGenresQuery = "DELETE FROM FILMS_GENRES WHERE FILM_ID = ?";
         jdbcTemplate.update(deleteGenresQuery, film.getId());
