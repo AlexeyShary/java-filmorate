@@ -7,6 +7,13 @@ VALUES
 ('Стражи галактики', 'Я есть Грут', '2014-07-21', 121, 1),
 ('tst3', 'tst3', '2014-07-21', 121, 1);
 
+INSERT INTO USERS (EMAIL, LOGIN, USER_NAME, BIRTHDAY)
+VALUES
+('Matthew@McConaughey.com', 'Matt', 'Matthew McConaughey', '1969-11-04'),
+('Groot@Iam.Groot', 'Groot', 'Groot', '2014-03-24'),
+('chan@ya.ru', 'ChonWang', 'Jackie Chan', '1954-04-07'),
+('murray@ya.ru','DrPeterVenkman','Bill Murray','1950-09-21');
+
 INSERT INTO USERS_FILMS_LIKES (USER_ID, FILM_ID)
 VALUES
 (1, 1),
