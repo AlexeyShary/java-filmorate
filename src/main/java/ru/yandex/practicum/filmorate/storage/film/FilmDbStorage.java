@@ -108,7 +108,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Long> getUsersLikedFilmsIds(long userId) {
         String query = "SELECT FILM_ID FROM USERS_FILMS_LIKES WHERE USER_ID = ?";
-        return jdbcTemplate.query(query, (rs, rowNum) -> rs.getLong("FILM_ID"), userId);
+        return jdbcTemplate.queryForList(query, Long.class, userId);
     }
 
     private void updateGenresSubtable(Film film) {
