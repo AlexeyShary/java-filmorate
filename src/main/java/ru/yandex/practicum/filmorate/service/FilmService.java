@@ -35,6 +35,10 @@ public class FilmService {
         return filmStorage.get(id);
     }
 
+    public Collection<Film> getSearchResult(String searchTerm, String by) {
+        return filmStorage.getSearchResult(searchTerm, by);
+    }
+
     public Collection<Film> getPopular(long count) {
         /*
         return getAll().stream()
