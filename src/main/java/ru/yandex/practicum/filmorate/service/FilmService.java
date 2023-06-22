@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.Collection;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -82,6 +82,37 @@ public class FilmService {
         likesStorage.deleteLike(userId, id);
 
         log.debug("Удален лайк фильму {} от пользователя {}", id, userId);
+    }
+
+    public Set<Film> getRecommendations(long userId) {
+        Map<Long, List<Long>> filmsOfUsers = new HashMap<>();
+        Collection<User> allUsers = userStorage.getAll();
+        for (User user : allUsers) {
+            filmsOfUsers.put(user.getId(), filmStorage.getUsersLikedFilmsIds(user.getId()));
+        }
+        long maxIntersection = 0;
+        Set<Long> intersection = new HashSet<>();
+        for (Long id : filmsOfUsers.keySet()) {
+            if (id == userId) continue;
+
+            long numOfIntersection = filmsOfUsers.get(id).stream()
+                    .filter(filmId -> filmsOfUsers.get(userId).contains(filmId)).count();
+
+            if (numOfIntersection == maxIntersection & numOfIntersection != 0) {
+                intersection.add(id);
+            }
+
+            if (numOfIntersection > maxIntersection) {
+                maxIntersection = numOfIntersection;
+                intersection = new HashSet<>();
+                intersection.add(id);
+            }
+        }
+        if (maxIntersection == 0) return new HashSet<>();
+        else return intersection.stream().flatMap(idUser -> filmStorage.getUsersLikedFilmsIds(idUser).stream())
+                .filter(filmId -> !filmsOfUsers.get(userId).contains(filmId))
+                .map(filmStorage::get)
+                .collect(Collectors.toSet());
     }
 
     public Collection<Film> getDirectorFilmsSorted(long directorId, String sortBy) {

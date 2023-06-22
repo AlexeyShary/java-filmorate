@@ -94,8 +94,7 @@ public class FilmDbStorage implements FilmStorage {
                     film.getId()));
         }
 
-        String updateQuery = "UPDATE FILMS SET FILM_NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?," +
-                " DURATION = ?, MPA_ID = ? WHERE FILM_ID = ?";
+        String updateQuery = "UPDATE FILMS SET FILM_NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, MPA_ID = ? WHERE FILM_ID = ?";
 
         jdbcTemplate.update(updateQuery,
                 film.getName(),
@@ -109,6 +108,12 @@ public class FilmDbStorage implements FilmStorage {
         updateDirectorsSubtable(film);
 
         return film;
+    }
+
+    @Override
+    public List<Long> getUsersLikedFilmsIds(long userId) {
+        String query = "SELECT FILM_ID FROM USERS_FILMS_LIKES WHERE USER_ID = ?";
+        return jdbcTemplate.queryForList(query, Long.class, userId);
     }
 
     @Override
