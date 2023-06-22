@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -33,6 +34,10 @@ public class FilmService {
 
     public Film get(long id) {
         return filmStorage.get(id);
+    }
+
+    public Collection<Film> getSearchResult(String searchTerm, String by) {
+        return filmStorage.getSearchResult(searchTerm, by);
     }
 
     public Collection<Film> getPopular(long count) {
