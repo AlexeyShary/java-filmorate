@@ -35,10 +35,10 @@ public class FilmService {
         return filmStorage.get(id);
     }
 
-    public Collection<Film> getCommonFilms(long userId, long friendId) {
-        return likesStorage.getCommonFilmsIds(userId, friendId).stream()
-                .map(filmStorage::get)
-                .collect(Collectors.toList());
+    public Collection<Film> getCommon(long userId, long friendId) {
+        Collection<Long> commonFilmsIds = likesStorage.getCommonFilmsIds(userId, friendId);
+        return filmStorage.getFilmsByListIds(commonFilmsIds);
+
     }
 
     public Collection<Film> getPopular(long count) {

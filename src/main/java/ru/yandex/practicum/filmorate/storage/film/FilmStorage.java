@@ -7,6 +7,8 @@ import java.util.Collection;
 public interface FilmStorage {
     Collection<Film> getAll();
 
+    Collection<Film> getFilmsByListIds(Collection<Long> filmIds);
+
     Film get(long id);
 
     Film create(Film film);

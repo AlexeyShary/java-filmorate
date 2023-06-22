@@ -30,8 +30,8 @@ public class FilmController {
     }
 
     @GetMapping("/common")
-    public Collection<Film> getCommonFilms(@RequestParam long userId, @RequestParam long friendId) {
-        return filmService.getCommonFilms(userId, friendId);
+    public Collection<Film> getCommon(@RequestParam long userId, @RequestParam long friendId) {
+        return filmService.getCommon(userId, friendId);
     }
 
     @PostMapping
