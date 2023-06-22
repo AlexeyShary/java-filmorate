@@ -114,4 +114,8 @@ public class FilmService {
                 .map(filmStorage::get)
                 .collect(Collectors.toSet());
     }
+
+    public Collection<Film> getDirectorFilmsSorted(long directorId, String sortBy) {
+        return filmStorage.getDirectorFilmsSorted(directorId, sortBy);
+    }
 }
