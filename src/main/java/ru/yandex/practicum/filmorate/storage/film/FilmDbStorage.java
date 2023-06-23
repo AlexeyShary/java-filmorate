@@ -9,18 +9,17 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -74,6 +73,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setId(filmId.longValue());
 
         updateGenresSubtable(film);
+        updateDirectorsSubtable(film);
 
         return film;
     }
@@ -90,7 +90,8 @@ public class FilmDbStorage implements FilmStorage {
             jdbcTemplate.queryForObject("SELECT FILM_ID FROM FILMS WHERE FILM_ID = ?", Long.class, film.getId());
         } catch (EmptyResultDataAccessException e) {
             log.error("Ошибка при обновлении фильма с ID {}. " + e.getMessage(), film.getId());
-            throw new IncorrectIdException(String.format("Ошибка при обновлении фильма с ID {}. " + e.getMessage(), film.getId()));
+            throw new IncorrectIdException(String.format("Ошибка при обновлении фильма с ID {}. " + e.getMessage(),
+                    film.getId()));
         }
 
         String updateQuery = "UPDATE FILMS SET FILM_NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, MPA_ID = ? WHERE FILM_ID = ?";
@@ -104,8 +105,47 @@ public class FilmDbStorage implements FilmStorage {
                 film.getId());
 
         updateGenresSubtable(film);
+        updateDirectorsSubtable(film);
 
         return film;
+    }
+
+    @Override
+    public List<Long> getUsersLikedFilmsIds(long userId) {
+        String query = "SELECT FILM_ID FROM USERS_FILMS_LIKES WHERE USER_ID = ?";
+        return jdbcTemplate.queryForList(query, Long.class, userId);
+    }
+
+    @Override
+    public Collection<Film> getDirectorFilmsSorted(long directorId, String sortBy) {
+        String sortByYearQuery = "SELECT f.*, m.MPA_NAME" +
+                " FROM FILMS_DIRECTORS fd" +
+                " JOIN FILMS f ON fd.FILM_ID = f.FILM_ID" +
+                " JOIN MPA m ON f.MPA_ID = m.MPA_ID" +
+                " WHERE DIRECTOR_ID = ?" +
+                " ORDER BY YEAR(f.RELEASE_DATE)";
+
+        String sortByLikesQuery = "SELECT f.*, m.MPA_NAME," +
+                " (SELECT COUNT(*) FROM USERS_FILMS_LIKES ufl WHERE fd.FILM_ID = ufl.FILM_ID) AS LIKES" +
+                " FROM FILMS_DIRECTORS fd" +
+                " JOIN FILMS f ON fd.FILM_ID = f.FILM_ID" +
+                " JOIN MPA m ON f.MPA_ID = m.MPA_ID" +
+                " WHERE DIRECTOR_ID = ?" +
+                " ORDER BY LIKES DESC";
+
+        Collection<Film> films = new ArrayList<>();
+
+        if (sortBy.equals("year")) {
+            films = jdbcTemplate.query(sortByYearQuery, new FilmMapper(), directorId);
+        } else if (sortBy.equals("likes")) {
+            films = jdbcTemplate.query(sortByLikesQuery, new FilmMapper(), directorId);
+        }
+
+        if (films.isEmpty()) {
+            throw new IncorrectIdException("Режиссер с ID " + directorId + " не найден.");
+        }
+
+        return films;
     }
 
     private void updateGenresSubtable(Film film) {
@@ -115,6 +155,16 @@ public class FilmDbStorage implements FilmStorage {
         String insertGenresQuery = "INSERT INTO FILMS_GENRES (FILM_ID, GENRE_ID) VALUES (?, ?)";
         for (Genre genre : film.getGenres()) {
             jdbcTemplate.update(insertGenresQuery, film.getId(), genre.getId());
+        }
+    }
+
+    private void updateDirectorsSubtable(Film film) {
+        String deleteDirectorsQuery = "DELETE FROM FILMS_DIRECTORS WHERE FILM_ID = ?";
+        jdbcTemplate.update(deleteDirectorsQuery, film.getId());
+
+        String insertDirectorsQuery = "INSERT INTO FILMS_DIRECTORS (FILM_ID, DIRECTOR_ID) VALUES (?, ?)";
+        for (Director director : film.getDirectors()) {
+            jdbcTemplate.update(insertDirectorsQuery, film.getId(), director.getId());
         }
     }
 
@@ -135,6 +185,14 @@ public class FilmDbStorage implements FilmStorage {
             for (Long genreId : genresIds) {
                 film.getGenres().add(genreStorage.get(genreId));
             }
+
+            String directorsQuery = "SELECT d.*" +
+                    " FROM DIRECTORS d" +
+                    " JOIN FILMS_DIRECTORS fd ON d.DIRECTOR_ID = fd.DIRECTOR_ID" +
+                    " WHERE FILM_ID = ?";
+            List<Director> directors = jdbcTemplate.query(directorsQuery,
+                    new DirectorDbStorage.DirectorMapper(), rs.getLong("FILM_ID"));
+            film.setDirectors(directors);
 
             return film;
         }
