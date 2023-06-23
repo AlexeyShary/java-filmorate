@@ -35,6 +35,12 @@ public class FilmService {
         return filmStorage.get(id);
     }
 
+    public Collection<Film> getCommon(long userId, long friendId) {
+        Collection<Long> commonFilmsIds = likesStorage.getCommonFilmsIds(userId, friendId);
+        return filmStorage.getFilmsByListIds(commonFilmsIds);
+
+    }
+
     public Collection<Film> getPopular(long count) {
         /*
         return getAll().stream()
