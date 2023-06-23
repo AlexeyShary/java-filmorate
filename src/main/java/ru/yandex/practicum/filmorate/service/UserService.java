@@ -63,12 +63,12 @@ public class UserService {
 
     public void deleteFromFriends(long id, long friendId) {
         friendsStorage.deleteFromFriends(id, friendId);
-        log.debug("Пользователи ID {} удалил из друзей пользователя {}", id, friendId);
+        log.debug("Пользователь ID {} удалил из друзей пользователя {}", id, friendId);
     }
 
     public Collection<User> getFriends(long id) {
-        return friendsStorage.getFriendsIds(id).stream()
-                .map(userStorage::get)
+        return friendsStorage.getFriendsIds(id)
+                .stream().map(userStorage::get)
                 .collect(Collectors.toList());
     }
 
