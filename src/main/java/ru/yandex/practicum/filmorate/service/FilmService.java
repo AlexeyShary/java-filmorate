@@ -41,16 +41,14 @@ public class FilmService {
 
     }
 
-    public Collection<Film> getPopular(long count) {
-        /*
-        return getAll().stream()
-                .sorted(Comparator.comparingInt(i -> -i.getLikedUsersIds().size()))
-                .limit(count)
-                .collect(Collectors.toList());*/
-
-        return likesStorage.getPopularFilmsIds(count).stream()
-                .map(filmStorage::get)
-                .collect(Collectors.toList());
+    public Collection<Film> getPopular(long count, Long genreId, Integer year) {
+        if (genreId == null && year == null) {
+            Collection<Long> popular = likesStorage.getPopularFilmsIds(count);
+            return filmStorage.getFilmsByListIds(popular);
+        } else {
+            Collection<Long> popularWithGenreAndYear = likesStorage.getFilmsIdsByGenreAndYear(count, genreId, year);
+            return filmStorage.getFilmsByListIds(popularWithGenreAndYear);
+        }
     }
 
     public Film create(Film film) {

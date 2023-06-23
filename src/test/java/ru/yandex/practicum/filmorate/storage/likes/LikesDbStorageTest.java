@@ -44,6 +44,13 @@ class LikesDbStorageTest {
 
         Assertions.assertThat(popularFilmsIds).isEqualTo(expectedIds);
     }
+    @Test
+    void getFilmsIdsByGenreAndYear(){
+        List<Long> filmsIdsByGenreAndYear = new ArrayList<>(likesDbStorage
+                .getFilmsIdsByGenreAndYear(5,4L,2014));
+        List<Long> expectedIds = Arrays.asList(3L, 1L);
+        Assertions.assertThat(filmsIdsByGenreAndYear).isEqualTo(expectedIds);
+    }
 
     @Test
     void getLikedUsersIds() {
