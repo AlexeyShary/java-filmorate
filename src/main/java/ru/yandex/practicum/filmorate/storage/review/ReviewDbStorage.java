@@ -40,7 +40,7 @@ public class ReviewDbStorage implements ReviewStorage {
                 throw new ExceptionValidate("Пользователь или фильм не могут быть null.");
             }
         }
-        if(review.getIsPositive() == null){
+        if (review.getIsPositive() == null) {
             log.error("При запросе к БД получили ошибку так как isPositive null.");
             throw new ExceptionValidate("isPositive не могут быть null.");
         }
