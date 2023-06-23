@@ -87,9 +87,7 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "SELECT f.* FROM FILMS f " +
                 "LEFT JOIN FILMS_DIRECTORS fd ON f.FILM_ID = fd.FILM_ID " +
                 "LEFT JOIN DIRECTORS d ON fd.DIRECTOR_ID = d.DIRECTOR_ID " +
-                "WHERE LOWER(d.DIRECTOR_NAME) LIKE ? " +
-                "ORDER BY CASE WHEN LOWER(d.DIRECTOR_NAME) LIKE ? THEN 0 ELSE 1 END, " +
-                "CASE WHEN LOWER(f.FILM_NAME) LIKE ? THEN 0 ELSE 1 END";
+                "WHERE LOWER(d.DIRECTOR_NAME) LIKE ? ";
         String param = "%" + query.toLowerCase() + "%";
         return jdbcTemplate.query(sql, new FilmMapper(), param);
     }
@@ -109,7 +107,7 @@ public class FilmDbStorage implements FilmStorage {
                 "CASE WHEN LOWER(f.FILM_NAME) LIKE ? THEN 0 ELSE 1 END";
         String directorParam = "%" + directorQuery.toLowerCase() + "%";
         String titleParam = "%" + titleQuery.toLowerCase() + "%";
-        return jdbcTemplate.query(sql, new FilmMapper(), directorParam, titleParam);
+        return jdbcTemplate.query(sql, new FilmMapper(), directorParam, titleParam, directorParam, titleParam);
     }
 
     @Override
