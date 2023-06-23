@@ -24,6 +24,11 @@ public class FilmController {
         return filmService.get(id);
     }
 
+    @GetMapping("/search")
+    public Collection<Film> getSearchResult(@RequestParam String query, @RequestParam String by) {
+        return filmService.getSearchResult(query, by);
+    }
+
     @GetMapping("/popular")
     public Collection<Film> getPopular(@RequestParam(defaultValue = "10", required = false) Long count) {
         return filmService.getPopular(count);

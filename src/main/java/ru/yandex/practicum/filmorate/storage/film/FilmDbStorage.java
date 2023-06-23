@@ -69,6 +69,48 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public Collection<Film> getSearchResult(String searchTerm, String by) {
+        switch (by.toLowerCase()) {
+            case "director":
+                return findByDirector(searchTerm);
+            case "title":
+                return findByTitle(searchTerm);
+            case "director,title":
+            case "title,director":
+                return findByDirectorAndTitle(searchTerm, searchTerm);
+            default:
+                throw new IllegalArgumentException("Invalid 'by' parameter");
+        }
+    }
+
+    private List<Film> findByDirector(String query) {
+        String sql = "SELECT f.* FROM FILMS f " +
+                "LEFT JOIN FILMS_DIRECTORS fd ON f.FILM_ID = fd.FILM_ID " +
+                "LEFT JOIN DIRECTORS d ON fd.DIRECTOR_ID = d.DIRECTOR_ID " +
+                "WHERE LOWER(d.DIRECTOR_NAME) LIKE ? ";
+        String param = "%" + query.toLowerCase() + "%";
+        return jdbcTemplate.query(sql, new FilmMapper(), param);
+    }
+
+    private List<Film> findByTitle(String query) {
+        String sql = "SELECT * FROM FILMS WHERE LOWER(FILM_NAME) LIKE ?";
+        String param = "%" + query.toLowerCase() + "%";
+        return jdbcTemplate.query(sql, new FilmMapper(), param);
+    }
+
+    private List<Film> findByDirectorAndTitle(String directorQuery, String titleQuery) {
+        String sql = "SELECT f.* FROM FILMS f " +
+                "LEFT JOIN FILMS_DIRECTORS fd ON f.FILM_ID = fd.FILM_ID " +
+                "LEFT JOIN DIRECTORS d ON fd.DIRECTOR_ID = d.DIRECTOR_ID " +
+                "WHERE LOWER(d.DIRECTOR_NAME) LIKE ? OR LOWER(f.FILM_NAME) LIKE ? " +
+                "ORDER BY CASE WHEN LOWER(d.DIRECTOR_NAME) LIKE ? THEN 0 ELSE 1 END, " +
+                "CASE WHEN LOWER(f.FILM_NAME) LIKE ? THEN 0 ELSE 1 END";
+        String directorParam = "%" + directorQuery.toLowerCase() + "%";
+        String titleParam = "%" + titleQuery.toLowerCase() + "%";
+        return jdbcTemplate.query(sql, new FilmMapper(), directorParam, titleParam, directorParam, titleParam);
+    }
+
+    @Override
     public Film create(Film film) {
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("FILMS")

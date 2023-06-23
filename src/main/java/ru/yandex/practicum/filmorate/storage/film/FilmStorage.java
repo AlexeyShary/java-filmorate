@@ -12,6 +12,8 @@ public interface FilmStorage {
 
     Film get(long id);
 
+    Collection<Film> getSearchResult(String searchTerm, String by);
+
     Film create(Film film);
 
     void delete(long id);
