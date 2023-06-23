@@ -50,4 +50,10 @@ class LikesDbStorageTest {
         assertThat(likesDbStorage.getLikedUsersIds(1)
                 .containsAll(Arrays.asList(1L, 2L, 3L)));
     }
+
+    @Test
+    void getCommonFilmsIds() {
+        assertThat(likesDbStorage.getCommonFilmsIds(1, 2)
+                .containsAll(Arrays.asList(2L, 3L)));
+    }
 }

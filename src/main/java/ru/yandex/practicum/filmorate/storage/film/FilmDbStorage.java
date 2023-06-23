@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
@@ -41,6 +44,16 @@ public class FilmDbStorage implements FilmStorage {
         String q = "SELECT FILM_ID, FILM_NAME, DESCRIPTION, RELEASE_DATE, DURATION, MPA_ID" +
                 " FROM FILMS";
         return jdbcTemplate.query(q, new FilmMapper());
+    }
+
+    public Collection<Film> getFilmsByListIds(Collection<Long> filmIds) {
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        SqlParameterSource namedParameters = new MapSqlParameterSource("filmIds", filmIds);
+
+        String query = "SELECT FILM_ID, FILM_NAME, DESCRIPTION, RELEASE_DATE, DURATION, MPA_ID"
+                + " FROM FILMS WHERE film_id IN (:filmIds)";
+
+        return namedParameterJdbcTemplate.query(query, namedParameters, new FilmMapper());
     }
 
     @Override
@@ -138,8 +151,7 @@ public class FilmDbStorage implements FilmStorage {
                     film.getId()));
         }
 
-        String updateQuery = "UPDATE FILMS SET FILM_NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?," +
-                " DURATION = ?, MPA_ID = ? WHERE FILM_ID = ?";
+        String updateQuery = "UPDATE FILMS SET FILM_NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, MPA_ID = ? WHERE FILM_ID = ?";
 
         jdbcTemplate.update(updateQuery,
                 film.getName(),
@@ -153,6 +165,12 @@ public class FilmDbStorage implements FilmStorage {
         updateDirectorsSubtable(film);
 
         return film;
+    }
+
+    @Override
+    public List<Long> getUsersLikedFilmsIds(long userId) {
+        String query = "SELECT FILM_ID FROM USERS_FILMS_LIKES WHERE USER_ID = ?";
+        return jdbcTemplate.queryForList(query, Long.class, userId);
     }
 
     @Override

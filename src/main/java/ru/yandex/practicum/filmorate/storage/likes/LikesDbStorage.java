@@ -38,4 +38,16 @@ public class LikesDbStorage implements LikesStorage {
         String q = "SELECT USER_ID FROM USERS_FILMS_LIKES WHERE FILM_ID = ?";
         return jdbcTemplate.queryForList(q, Long.class, filmId);
     }
+
+    @Override
+    public Collection<Long> getCommonFilmsIds(long userId, long friendId) {
+        String q = "SELECT FILM_ID" +
+                " FROM USERS_FILMS_LIKES" +
+                " WHERE USER_ID = ?" +
+                " INTERSECT SELECT FILM_ID" +
+                " FROM USERS_FILMS_LIKES" +
+                " WHERE USER_ID = ?" +
+                " GROUP BY USER_ID, FILM_ID";
+        return jdbcTemplate.queryForList(q, Long.class, userId, friendId);
+    }
 }

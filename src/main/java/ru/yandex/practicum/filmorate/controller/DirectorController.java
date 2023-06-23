@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.service.DirectorService;
@@ -25,6 +26,7 @@ public class DirectorController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Director create(@Valid @RequestBody Director director) {
         return directorService.create(director);
     }
@@ -35,6 +37,7 @@ public class DirectorController {
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable long id) {
         directorService.delete(id);
     }
