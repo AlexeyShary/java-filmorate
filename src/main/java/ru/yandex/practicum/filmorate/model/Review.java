@@ -7,14 +7,14 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class Review {
-    private int reviewId;
+    private long reviewId;
     @NotBlank
     private String content;
     @NotNull
     private Boolean isPositive;
     @NotNull
-    private int userId;
+    private Long userId;
     @NotNull
-    private int filmId;
-    private int useful;
+    private Long filmId;
+    private Long useful;
 }
