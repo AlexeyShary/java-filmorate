@@ -38,11 +38,11 @@ public class LikesDbStorage implements LikesStorage {
     @Override
     public Collection<Long> getFilmsIdsByGenreAndYear(long count, Long genreId, Integer year) {
         StringBuilder q = new StringBuilder();
-        q.append("SELECT F.FILM_ID");
-        q.append(" FROM FILMS AS F");
-        q.append(" LEFT JOIN FILMS_GENRES AS FG ON F.FILM_ID = FG.FILM_ID");
-        q.append(" LEFT JOIN USERS_FILMS_LIKES AS UFL ON F.FILM_ID = UFL.FILM_ID");
-        q.append(" WHERE 1=1");
+        q.append("SELECT F.FILM_ID " +
+                "FROM FILMS AS F " +
+                "LEFT JOIN FILMS_GENRES AS FG ON F.FILM_ID = FG.FILM_ID " +
+                "LEFT JOIN USERS_FILMS_LIKES AS UFL ON F.FILM_ID = UFL.FILM_ID " +
+                "WHERE 1=1");
 
         List<Object> paramsList = new ArrayList<>();
         if (genreId != null) {
@@ -53,9 +53,9 @@ public class LikesDbStorage implements LikesStorage {
             q.append(" AND YEAR(F.RELEASE_DATE) = ?");
             paramsList.add(year);
         }
-        q.append(" GROUP BY F.FILM_ID");
-        q.append(" ORDER BY COUNT(UFL.USER_ID) DESC");
-        q.append(" LIMIT ?");
+        q.append(" GROUP BY F.FILM_ID " +
+                "ORDER BY COUNT(UFL.USER_ID) DESC " +
+                "LIMIT ?");
 
         paramsList.add(count);
 

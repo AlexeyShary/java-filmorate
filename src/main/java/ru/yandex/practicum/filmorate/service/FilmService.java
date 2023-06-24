@@ -41,6 +41,10 @@ public class FilmService {
 
     }
 
+    public Collection<Film> getSearchResult(String searchTerm, String by) {
+        return filmStorage.getSearchResult(searchTerm, by);
+    }
+
     public Collection<Film> getPopular(long count, Long genreId, Integer year) {
         if (genreId == null && year == null) {
             Collection<Long> popular = likesStorage.getPopularFilmsIds(count);
