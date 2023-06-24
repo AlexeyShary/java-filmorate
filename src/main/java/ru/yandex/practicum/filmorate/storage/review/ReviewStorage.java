@@ -14,5 +14,6 @@ public interface ReviewStorage {
     Review get(long reviewId);
 
     List<Review> getAll(Integer filmId, Integer count);
+
     void haveReview(long reviewId);
 }
