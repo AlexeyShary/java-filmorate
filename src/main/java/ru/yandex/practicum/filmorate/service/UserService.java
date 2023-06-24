@@ -72,8 +72,8 @@ public class UserService {
     }
 
     public Collection<User> getFriends(long id) {
-        return friendsStorage.getFriendsIds(id).stream()
-                .map(userStorage::get)
+        return friendsStorage.getFriendsIds(id)
+                .stream().map(userStorage::get)
                 .collect(Collectors.toList());
     }
 
