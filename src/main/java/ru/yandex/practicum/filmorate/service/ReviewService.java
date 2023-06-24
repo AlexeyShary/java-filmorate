@@ -22,7 +22,7 @@ public class ReviewService {
     private final UserStorage userStorage;
 
     public Review add(Review review) {
-        if((review.getUserId() == null ) || (review.getFilmId() == null)){
+        if ((review.getUserId() == null) || (review.getFilmId() == null)) {
             throw new ExceptionValidate("userId или filmId = null");
         }
         filmStorage.get(review.getFilmId());
