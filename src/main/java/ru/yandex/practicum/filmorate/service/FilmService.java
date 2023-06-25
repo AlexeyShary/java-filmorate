@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.UserEvent;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -26,6 +27,9 @@ public class FilmService {
 
     @Qualifier("likesDbStorage")
     private final LikesStorage likesStorage;
+
+    @Qualifier("userEventService")
+    private final UserEventService userEventService;
 
     public Collection<Film> getAll() {
         return filmStorage.getAll();
@@ -74,6 +78,7 @@ public class FilmService {
         film.getLikedUsersIds().add(user.getId());
 
         likesStorage.addLike(userId, id);
+        userEventService.create(userId, id, UserEvent.EventType.LIKE, UserEvent.EventOperation.ADD);
 
         log.debug("Добавлен лайк фильму {} от пользователя {}", id, userId);
     }
@@ -88,6 +93,7 @@ public class FilmService {
         }
 
         likesStorage.deleteLike(userId, id);
+        userEventService.create(userId, id, UserEvent.EventType.LIKE, UserEvent.EventOperation.REMOVE);
 
         log.debug("Удален лайк фильму {} от пользователя {}", id, userId);
     }

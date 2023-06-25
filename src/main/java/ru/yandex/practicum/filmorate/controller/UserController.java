@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.model.UserEvent;
+import ru.yandex.practicum.filmorate.service.UserEventService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
@@ -17,6 +19,7 @@ import java.util.Set;
 public class UserController {
     private final UserService userService;
     private final FilmService filmService;
+    private final UserEventService userEventService;
 
     @GetMapping
     public Collection<User> getAll() {
@@ -36,6 +39,11 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     public Collection<User> getCommonFriends(@PathVariable long id, @PathVariable long otherId) {
         return userService.getCommonFriends(id, otherId);
+    }
+
+    @GetMapping("/{id}/feed")
+    public Collection<UserEvent> getUserEvents(@PathVariable long id) {
+        return userEventService.getByUser(id);
     }
 
     @PostMapping
