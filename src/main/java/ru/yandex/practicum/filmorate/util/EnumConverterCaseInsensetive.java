@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.util;
 import org.springframework.core.convert.converter.Converter;
 
 
-public class EnumConverterCaseInsensetive <T extends Enum<T>> implements Converter<String, T> {
+public class EnumConverterCaseInsensetive<T extends Enum<T>> implements Converter<String, T> {
     private final Class<T> enumClass;
 
     public EnumConverterCaseInsensetive(Class<T> enumClass) {
