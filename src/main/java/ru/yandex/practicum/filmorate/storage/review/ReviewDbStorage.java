@@ -78,30 +78,24 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public List<Review> getAll(Integer filmId, Integer count) {
-        if (filmId == null) {
-            log.info("filmId = null! Получаем из БД все отзывы.");
-            String q = "SELECT R.REVIEW_ID, R.CONTENT, R.IS_POSITIVE, R.USER_ID, R.FILM_ID, " +
-                    "(SUM(CASE WHEN RL.IS_POSITIVE = TRUE THEN 1 ELSE 0 END) - " +
-                    "SUM(CASE WHEN RL.IS_POSITIVE = FALSE THEN 1 ELSE 0 END)) AS USEFUL " +
-                    "FROM REVIEWS AS R " +
-                    "LEFT JOIN REVIEW_LIKES AS RL ON R.REVIEW_ID = RL.REVIEW_ID " +
-                    "GROUP BY R.REVIEW_ID " +
-                    "ORDER BY USEFUL DESC " +
-                    "LIMIT ?";
-            return jdbcTemplate.query(q, new ReviewMapper(), count);
-        } else {
+        String q = "SELECT R.REVIEW_ID, R.CONTENT, R.IS_POSITIVE, R.USER_ID, R.FILM_ID, " +
+                "(SUM(CASE WHEN RL.IS_POSITIVE = TRUE THEN 1 ELSE 0 END) - " +
+                "SUM(CASE WHEN RL.IS_POSITIVE = FALSE THEN 1 ELSE 0 END)) AS USEFUL " +
+                "FROM REVIEWS AS R " +
+                "LEFT JOIN REVIEW_LIKES AS RL ON R.REVIEW_ID = RL.REVIEW_ID " +
+                "%s" +
+                "GROUP BY R.REVIEW_ID " +
+                "ORDER BY USEFUL DESC " +
+                "LIMIT ?";
+        String fullQuery;
+        if (filmId != null) {
             log.info("Получаем все отзывы у фильма с id: " + filmId);
-            String q = "SELECT R.REVIEW_ID, R.CONTENT, R.IS_POSITIVE, R.USER_ID, R.FILM_ID, " +
-                    "(SUM(CASE WHEN RL.IS_POSITIVE = TRUE THEN 1 ELSE 0 END) - " +
-                    "SUM(CASE WHEN RL.IS_POSITIVE = FALSE THEN 1 ELSE 0 END)) AS USEFUL " +
-                    "FROM REVIEWS AS R " +
-                    "LEFT JOIN REVIEW_LIKES AS RL ON R.REVIEW_ID = RL.REVIEW_ID " +
-                    "WHERE R.FILM_ID = ? " +
-                    "GROUP BY R.REVIEW_ID " +
-                    "ORDER BY USEFUL DESC " +
-                    "LIMIT ?";
-            return jdbcTemplate.query(q, new ReviewMapper(), filmId, count);
+            fullQuery = String.format(q, "WHERE R.FILM_ID = " + filmId);
+        } else {
+            log.info("filmId = null! Получаем из БД все отзывы.");
+            fullQuery = String.format(q, "");
         }
+        return jdbcTemplate.query(fullQuery, new ReviewMapper(), count);
     }
 
     @Override
