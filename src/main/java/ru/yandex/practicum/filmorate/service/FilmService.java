@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.SortBy;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.UserEvent;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -129,7 +130,7 @@ public class FilmService {
                 .collect(Collectors.toSet());
     }
 
-    public Collection<Film> getDirectorFilmsSorted(long directorId, String sortBy) {
+    public Collection<Film> getDirectorFilmsSorted(long directorId, SortBy sortBy) {
         return filmStorage.getDirectorFilmsSorted(directorId, sortBy);
     }
 }

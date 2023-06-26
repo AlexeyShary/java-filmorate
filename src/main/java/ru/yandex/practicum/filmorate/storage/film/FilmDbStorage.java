@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.SortBy;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
@@ -172,7 +173,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getDirectorFilmsSorted(long directorId, String sortBy) {
+    public Collection<Film> getDirectorFilmsSorted(long directorId, SortBy sortBy) {
         String sortByYearQuery = "SELECT f.*, m.MPA_NAME" +
                 " FROM FILMS_DIRECTORS fd" +
                 " JOIN FILMS f ON fd.FILM_ID = f.FILM_ID" +
@@ -190,9 +191,9 @@ public class FilmDbStorage implements FilmStorage {
 
         Collection<Film> films = new ArrayList<>();
 
-        if (sortBy.equals("year")) {
+        if (sortBy == SortBy.YEAR) {
             films = jdbcTemplate.query(sortByYearQuery, new FilmMapper(), directorId);
-        } else if (sortBy.equals("likes")) {
+        } else if (sortBy == SortBy.LIKES) {
             films = jdbcTemplate.query(sortByLikesQuery, new FilmMapper(), directorId);
         }
 
