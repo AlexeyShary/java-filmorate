@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmSearchByMode;
 import ru.yandex.practicum.filmorate.model.SortBy;
 
 import java.util.Collection;
@@ -13,7 +14,7 @@ public interface FilmStorage {
 
     Film get(long id);
 
-    Collection<Film> getSearchResult(String searchTerm, String by);
+    Collection<Film> getSearchResult(String searchTerm, FilmSearchByMode by);
 
     Film create(Film film);
 
