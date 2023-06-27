@@ -12,7 +12,6 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
-import ru.yandex.practicum.filmorate.exception.IncorrectParamException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -196,7 +195,7 @@ public class FilmDbStorage implements FilmStorage {
             case LIKES:
                 return jdbcTemplate.query(sortByLikesQuery, new FilmMapper(), directorId);
             default:
-                throw new IncorrectParamException("Передан некорректный параметр сортировки " + sortBy);
+                throw new IllegalArgumentException("Передан некорректный параметр сортировки " + sortBy);
         }
     }
 
