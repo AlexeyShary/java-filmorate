@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-public enum SortBy {
+public enum FilmSortByMode {
     YEAR,
     LIKES
 }

@@ -12,10 +12,11 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
+import ru.yandex.practicum.filmorate.exception.IncorrectParamException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.SortBy;
+import ru.yandex.practicum.filmorate.model.FilmSortByMode;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
@@ -173,7 +174,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getDirectorFilmsSorted(long directorId, SortBy sortBy) {
+    public Collection<Film> getDirectorFilmsSorted(long directorId, FilmSortByMode sortBy) {
         String sortByYearQuery = "SELECT f.*, m.MPA_NAME" +
                 " FROM FILMS_DIRECTORS fd" +
                 " JOIN FILMS f ON fd.FILM_ID = f.FILM_ID" +
@@ -189,19 +190,14 @@ public class FilmDbStorage implements FilmStorage {
                 " WHERE DIRECTOR_ID = ?" +
                 " ORDER BY LIKES DESC";
 
-        Collection<Film> films = new ArrayList<>();
-
-        if (sortBy == SortBy.YEAR) {
-            films = jdbcTemplate.query(sortByYearQuery, new FilmMapper(), directorId);
-        } else if (sortBy == SortBy.LIKES) {
-            films = jdbcTemplate.query(sortByLikesQuery, new FilmMapper(), directorId);
+        switch (sortBy) {
+            case YEAR:
+                return jdbcTemplate.query(sortByYearQuery, new FilmMapper(), directorId);
+            case LIKES:
+                return jdbcTemplate.query(sortByLikesQuery, new FilmMapper(), directorId);
+            default:
+                throw new IncorrectParamException("Передан некорректный параметр сортировки " + sortBy);
         }
-
-        if (films.isEmpty()) {
-            throw new IncorrectIdException("Режиссер с ID " + directorId + " не найден.");
-        }
-
-        return films;
     }
 
     private void updateGenresSubtable(Film film) {
