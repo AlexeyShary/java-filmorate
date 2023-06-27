@@ -12,19 +12,19 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.FilmSortByMode;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
+import ru.yandex.practicum.filmorate.storage.mark.MarkStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -40,6 +40,9 @@ public class FilmDbStorage implements FilmStorage {
 
     @Qualifier("likesDbStorage")
     private final LikesStorage likesStorage;
+
+    @Qualifier("markDbStorage")
+    private final MarkStorage markStorage;
 
     @Override
     public Collection<Film> getAll() {
@@ -230,6 +233,8 @@ public class FilmDbStorage implements FilmStorage {
             film.setDuration(rs.getInt("DURATION"));
             film.setMpa(mpaStorage.get(rs.getLong("MPA_ID")));
             film.getLikedUsersIds().addAll(likesStorage.getLikedUsersIds(film.getId()));
+            film.getMarks().addAll(markStorage.getAllMarksOfFilm(film.getId()));
+            film.setRating();
 
             String genresQuery = "SELECT GENRE_ID FROM FILMS_GENRES WHERE FILM_ID = ?";
             List<Long> genresIds = jdbcTemplate.queryForList(genresQuery, Long.class, film.getId());

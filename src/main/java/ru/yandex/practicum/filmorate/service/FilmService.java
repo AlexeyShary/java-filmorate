@@ -86,11 +86,6 @@ public class FilmService {
     }
 
     public void addMark(long id, long userId, int value) {
-        Film film = get(id);
-        User user = userStorage.get(userId);
-
-        film.getMarks().put(userId, value);
-
         markStorage.addMark(userId, id, value);
         userEventService.create(userId, id, UserEvent.EventType.MARK, UserEvent.EventOperation.ADD);
 
@@ -113,14 +108,6 @@ public class FilmService {
     }
 
     public void deleteMark(long id, long userId) {
-        Film film = get(id);
-        User user = userStorage.get(userId);
-
-        if (!film.getMarks().containsKey(userId)) {
-            log.warn("Ошибка про удалении оценки с фильма - пользователь с ID {} не оценивал фильм {}", userId, id);
-            throw new IncorrectIdException("Пользователь с ID " + userId + " не оценивал фильм " + id);
-        }
-
         markStorage.deleteMark(userId, id);
         userEventService.create(userId, id, UserEvent.EventType.MARK, UserEvent.EventOperation.REMOVE);
 

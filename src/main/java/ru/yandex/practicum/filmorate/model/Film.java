@@ -25,11 +25,20 @@ public class Film {
     private Set<Genre> genres = new TreeSet<>(Comparator.comparingLong(Genre::getId));
     private Mpa mpa;
     private List<Director> directors = new ArrayList<>();
-    private HashMap<Long, Integer> marks = new HashMap<>();
+    private Set<Mark> marks = new HashSet<>();
+    private double rating;
 
     @JsonSetter
     public void setGenres(Set<Genre> genres) {
         this.genres.clear();
         this.genres.addAll(genres);
+    }
+
+    @JsonSetter
+    public void setRating() {
+        OptionalDouble avgMark = marks.stream()
+                .mapToDouble(Mark::getValue)
+                .average();
+        this.rating = avgMark.orElse(0);
     }
 }
