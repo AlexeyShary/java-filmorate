@@ -5,13 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.FilmSortByMode;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.UserEvent;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
+import ru.yandex.practicum.filmorate.storage.mark.MarkStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
@@ -32,6 +29,9 @@ public class FilmService {
 
     @Qualifier("userEventService")
     private final UserEventService userEventService;
+
+    @Qualifier("markDbStorage")
+    private final MarkStorage markStorage;
 
     public Collection<Film> getAll() {
         return filmStorage.getAll();
@@ -85,6 +85,18 @@ public class FilmService {
         log.debug("Добавлен лайк фильму {} от пользователя {}", id, userId);
     }
 
+    public void addMark(long id, long userId, int value) {
+        Film film = get(id);
+        User user = userStorage.get(userId);
+
+        film.getMarks().put(userId, value);
+
+        markStorage.addMark(userId, id, value);
+        userEventService.create(userId, id, UserEvent.EventType.MARK, UserEvent.EventOperation.ADD);
+
+        log.debug("Добавлена оценка {} фильму {} от пользователя {}", value, id, userId);
+    }
+
     public void deleteLike(long id, long userId) {
         Film film = get(id);
         User user = userStorage.get(userId);
@@ -98,6 +110,21 @@ public class FilmService {
         userEventService.create(userId, id, UserEvent.EventType.LIKE, UserEvent.EventOperation.REMOVE);
 
         log.debug("Удален лайк фильму {} от пользователя {}", id, userId);
+    }
+
+    public void deleteMark(long id, long userId) {
+        Film film = get(id);
+        User user = userStorage.get(userId);
+
+        if (!film.getMarks().containsKey(userId)) {
+            log.warn("Ошибка про удалении оценки с фильма - пользователь с ID {} не оценивал фильм {}", userId, id);
+            throw new IncorrectIdException("Пользователь с ID " + userId + " не оценивал фильм " + id);
+        }
+
+        markStorage.deleteMark(userId, id);
+        userEventService.create(userId, id, UserEvent.EventType.MARK, UserEvent.EventOperation.REMOVE);
+
+        log.debug("Удалена оценка фильму {} от пользователя {}", id, userId);
     }
 
     public Set<Film> getRecommendations(long userId) {

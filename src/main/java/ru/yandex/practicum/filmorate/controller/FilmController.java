@@ -58,6 +58,16 @@ public class FilmController {
         filmService.addLike(id, userId);
     }
 
+    @PutMapping("/{id}/mark/{userId}")
+    public  void addMark(@PathVariable long id, @PathVariable long userId, @RequestParam int value) {
+        filmService.addMark(id, userId, value);
+    }
+
+    @DeleteMapping("/{id}/mark/{userId}")
+    public  void deleteMark(@PathVariable long id, @PathVariable long userId) {
+        filmService.deleteMark(id, userId);
+    }
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable long id) {
         filmService.delete(id);

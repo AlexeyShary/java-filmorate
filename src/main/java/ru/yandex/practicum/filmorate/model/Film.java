@@ -25,6 +25,7 @@ public class Film {
     private Set<Genre> genres = new TreeSet<>(Comparator.comparingLong(Genre::getId));
     private Mpa mpa;
     private List<Director> directors = new ArrayList<>();
+    private HashMap<Long, Integer> marks = new HashMap<>();
 
     @JsonSetter
     public void setGenres(Set<Genre> genres) {

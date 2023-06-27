@@ -8,7 +8,6 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class Mark {
-    private long id;
     @NotNull
     private long userId;
     @NotNull
