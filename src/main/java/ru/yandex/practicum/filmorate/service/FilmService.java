@@ -6,12 +6,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmSortByMode;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.UserEvent;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.Collection;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -27,6 +30,9 @@ public class FilmService {
     @Qualifier("likesDbStorage")
     private final LikesStorage likesStorage;
 
+    @Qualifier("userEventService")
+    private final UserEventService userEventService;
+
     public Collection<Film> getAll() {
         return filmStorage.getAll();
     }
@@ -35,16 +41,24 @@ public class FilmService {
         return filmStorage.get(id);
     }
 
-    public Collection<Film> getPopular(long count) {
-        /*
-        return getAll().stream()
-                .sorted(Comparator.comparingInt(i -> -i.getLikedUsersIds().size()))
-                .limit(count)
-                .collect(Collectors.toList());*/
+    public Collection<Film> getCommon(long userId, long friendId) {
+        Collection<Long> commonFilmsIds = likesStorage.getCommonFilmsIds(userId, friendId);
+        return filmStorage.getFilmsByListIds(commonFilmsIds);
 
-        return likesStorage.getPopularFilmsIds(count).stream()
-                .map(filmStorage::get)
-                .collect(Collectors.toList());
+    }
+
+    public Collection<Film> getSearchResult(String searchTerm, FilmSearchByMode by) {
+        return filmStorage.getSearchResult(searchTerm, by);
+    }
+
+    public Collection<Film> getPopular(long count, Long genreId, Integer year) {
+        if (genreId == null && year == null) {
+            Collection<Long> popular = likesStorage.getPopularFilmsIds(count);
+            return filmStorage.getFilmsByListIds(popular);
+        } else {
+            Collection<Long> popularWithGenreAndYear = likesStorage.getFilmsIdsByGenreAndYear(count, genreId, year);
+            return filmStorage.getFilmsByListIds(popularWithGenreAndYear);
+        }
     }
 
     public Film create(Film film) {
@@ -66,6 +80,7 @@ public class FilmService {
         film.getLikedUsersIds().add(user.getId());
 
         likesStorage.addLike(userId, id);
+        userEventService.create(userId, id, UserEvent.EventType.LIKE, UserEvent.EventOperation.ADD);
 
         log.debug("Добавлен лайк фильму {} от пользователя {}", id, userId);
     }
@@ -80,7 +95,49 @@ public class FilmService {
         }
 
         likesStorage.deleteLike(userId, id);
+        userEventService.create(userId, id, UserEvent.EventType.LIKE, UserEvent.EventOperation.REMOVE);
 
         log.debug("Удален лайк фильму {} от пользователя {}", id, userId);
+    }
+
+    public Set<Film> getRecommendations(long userId) {
+        Map<Long, List<Long>> filmsOfUsers = new HashMap<>();
+        Collection<User> allUsers = userStorage.getAll();
+        for (User user : allUsers) {
+            filmsOfUsers.put(user.getId(), filmStorage.getUsersLikedFilmsIds(user.getId()));
+        }
+        long maxIntersection = 0;
+        Set<Long> intersection = new HashSet<>();
+        for (Long id : filmsOfUsers.keySet()) {
+            if (id == userId) continue;
+
+            long numOfIntersection = filmsOfUsers.get(id).stream()
+                    .filter(filmId -> filmsOfUsers.get(userId).contains(filmId)).count();
+
+            if (numOfIntersection == maxIntersection & numOfIntersection != 0) {
+                intersection.add(id);
+            }
+
+            if (numOfIntersection > maxIntersection) {
+                maxIntersection = numOfIntersection;
+                intersection = new HashSet<>();
+                intersection.add(id);
+            }
+        }
+        if (maxIntersection == 0) return new HashSet<>();
+        else return intersection.stream().flatMap(idUser -> filmStorage.getUsersLikedFilmsIds(idUser).stream())
+                .filter(filmId -> !filmsOfUsers.get(userId).contains(filmId))
+                .map(filmStorage::get)
+                .collect(Collectors.toSet());
+    }
+
+    public Collection<Film> getDirectorFilmsSorted(long directorId, FilmSortByMode sortBy) {
+        Collection<Film> films = filmStorage.getDirectorFilmsSorted(directorId, sortBy);
+
+        if (films.isEmpty()) {
+            throw new IncorrectIdException("Режиссер с ID " + directorId + " не найден.");
+        }
+
+        return films;
     }
 }

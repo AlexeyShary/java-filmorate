@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.UserEvent;
 import ru.yandex.practicum.filmorate.storage.friends.FriendsStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -21,6 +22,8 @@ public class UserService {
 
     @Qualifier("friendsDbStorage")
     private final FriendsStorage friendsStorage;
+
+    private final UserEventService userEventService;
 
     public Collection<User> getAll() {
         return userStorage.getAll();
@@ -58,17 +61,19 @@ public class UserService {
         }
 
         friendsStorage.addToFriends(id, friendId);
+        userEventService.create(id, friendId, UserEvent.EventType.FRIEND, UserEvent.EventOperation.ADD);
         log.debug("Пользователь ID {} добавил в друзья пользователя {}", id, friendId);
     }
 
     public void deleteFromFriends(long id, long friendId) {
         friendsStorage.deleteFromFriends(id, friendId);
+        userEventService.create(id, friendId, UserEvent.EventType.FRIEND, UserEvent.EventOperation.REMOVE);
         log.debug("Пользователи ID {} удалил из друзей пользователя {}", id, friendId);
     }
 
     public Collection<User> getFriends(long id) {
-        return friendsStorage.getFriendsIds(id).stream()
-                .map(userStorage::get)
+        return friendsStorage.getFriendsIds(id)
+                .stream().map(userStorage::get)
                 .collect(Collectors.toList());
     }
 
