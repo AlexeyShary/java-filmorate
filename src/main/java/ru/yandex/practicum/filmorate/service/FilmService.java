@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmSortByMode;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.UserEvent;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -46,7 +47,7 @@ public class FilmService {
 
     }
 
-    public Collection<Film> getSearchResult(String searchTerm, String by) {
+    public Collection<Film> getSearchResult(String searchTerm, FilmSearchByMode by) {
         return filmStorage.getSearchResult(searchTerm, by);
     }
 

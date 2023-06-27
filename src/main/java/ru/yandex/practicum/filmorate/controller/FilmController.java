@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmSearchByMode;
 import ru.yandex.practicum.filmorate.model.FilmSortByMode;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -26,7 +27,7 @@ public class FilmController {
     }
 
     @GetMapping("/search")
-    public Collection<Film> getSearchResult(@RequestParam String query, @RequestParam String by) {
+    public Collection<Film> getSearchResult(@RequestParam String query, @RequestParam FilmSearchByMode by) {
         return filmService.getSearchResult(query, by);
     }
 
