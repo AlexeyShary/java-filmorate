@@ -202,7 +202,11 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> getPopularFilms(long count) {
         String q = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, F.DURATION, F.MPA_ID," +
-                " AVG(CASE WHEN L.USER_ID IS NOT NULL THEN 10 ELSE M.MARK_VALUE END) AS RATING" +
+                " CASE " +
+                    " WHEN COUNT(M.MARK_VALUE) + COUNT(L.USER_ID) = 0 THEN 0" +
+                    " WHEN COUNT(M.MARK_VALUE) = 0 THEN 10" +
+                    " ELSE (COALESCE(SUM(M.MARK_VALUE), 0) + (COUNT(L.USER_ID) * 10)) / (COUNT(M.MARK_VALUE) + COUNT(L.USER_ID))" +
+                " END AS RATING" +
                 " FROM FILMS F" +
                 " LEFT JOIN FILMS_MARKS M ON F.FILM_ID = M.FILM_ID" +
                 " LEFT JOIN USERS_FILMS_LIKES L ON F.FILM_ID = L.FILM_ID" +
@@ -216,7 +220,11 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> getPopularFilmsByGenreAndYear(long count, Long genreId, Integer year) {
         String q = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, F.DURATION, F.MPA_ID," +
-                " AVG(CASE WHEN L.USER_ID IS NOT NULL THEN 10 ELSE M.MARK_VALUE END) AS RATING" +
+                " CASE " +
+                    " WHEN COUNT(M.MARK_VALUE) + COUNT(L.USER_ID) = 0 THEN 0" +
+                    " WHEN COUNT(M.MARK_VALUE) = 0 THEN 10" +
+                    " ELSE (COALESCE(SUM(M.MARK_VALUE), 0) + (COUNT(L.USER_ID) * 10)) / (COUNT(M.MARK_VALUE) + COUNT(L.USER_ID))" +
+                " END AS RATING" +
                 " FROM FILMS F" +
                 " INNER JOIN FILMS_GENRES FG ON F.FILM_ID = FG.FILM_ID" +
                 " LEFT JOIN FILMS_MARKS M ON F.FILM_ID = M.FILM_ID" +
