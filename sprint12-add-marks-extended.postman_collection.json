@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "ac3b258f-1885-4713-9295-e3e432ee14c7",
+		"_postman_id": "cd96e829-c94f-4403-a9b7-37897bd7a3e4",
 		"name": "sprint12/add-marks-extended",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "26948900"
+		"_exporter_id": "26980576"
 	},
 	"item": [
 		{
@@ -27770,6 +27770,496 @@
 									"path": [
 										"films",
 										"popular"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "films-of-director-sorted-by-marks",
+					"item": [
+						{
+							"name": "Film id=2 add director id=1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.be.ok;\r",
+											"});\r",
+											"pm.test(\"Has film update response\", function () {\r",
+											"    pm.response.to.be.withBody;\r",
+											"    pm.response.to.be.json;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Test film 'id' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.have.property('id');\r",
+											"    pm.expect(jsonData.id, '\"id\" must be 2').to.eql(2);\r",
+											"});\r",
+											"pm.test(\"Test film 'name' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.have.property('name');\r",
+											"    pm.expect(jsonData.name, '\"name\" must be \"New film\"').to.eql('New film');\r",
+											"});\r",
+											"pm.test(\"Test film 'description' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.have.property('description');\r",
+											"    pm.expect(jsonData.description, '\"description\" must be \"New film about friends\"').to.eql('New film about friends');\r",
+											"});\r",
+											"pm.test(\"Test film 'releaseDate' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.have.property('releaseDate');\r",
+											"    pm.expect(jsonData.releaseDate, '\"releaseDate\" field must be \"1999-04-30\"').to.eql('1999-04-30');\r",
+											"});\r",
+											"pm.test(\"Test film 'duration' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.have.property('duration');\r",
+											"    pm.expect(jsonData.duration, '\"duration\" field must be 120').to.eql(120);    \r",
+											"});\r",
+											"pm.test(\"Test film 'mpa.id' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.have.property('mpa');\r",
+											"    pm.expect(jsonData.mpa).to.have.property('id');\r",
+											"    pm.expect(jsonData.mpa.id, '\"mpa.id\" field must be 3').to.eql(3);    \r",
+											"});\r",
+											"pm.test(\"Test film 'genres' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.have.property('genres');\r",
+											"    pm.expect(jsonData.genres.length, '\"genres\" field must be have 2 genre').to.eql(2);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Test film 'directors' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.have.property('directors');\r",
+											"    pm.expect(jsonData.directors.length, '\"directors\" field must be have 1 director').to.eql(1);\r",
+											"    pm.expect(jsonData.directors[0]).to.have.property('id');\r",
+											"    pm.expect(jsonData.directors[0].id, '\"directors[0].id\" field must be 1').to.eql(1);    \r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n        \"id\": 2,\r\n        \"name\": \"New film\",\r\n        \"description\": \"New film about friends\",\r\n        \"releaseDate\": \"1999-04-30\",\r\n        \"duration\": 120,\r\n        \"likedUsersIds\": [],\r\n        \"genres\": [\r\n            {\r\n                \"id\": 1,\r\n                \"name\": \"Комедия\"\r\n            },\r\n            {\r\n                \"id\": 2,\r\n                \"name\": \"Драма\"\r\n            }\r\n        ],\r\n        \"mpa\": {\r\n            \"id\": 3,\r\n            \"name\": \"PG-13\"\r\n        },\r\n        \"directors\": [\r\n            {\r\n                \"id\": 1,\r\n                \"name\": \"Director updated\"\r\n            }\r\n        ],\r\n        \"marks\": [\r\n            1,\r\n            5\r\n        ],\r\n        \"rating\": 3.0\r\n    },",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/films",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"films"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get films with director=1 sort by marks",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.be.ok;\r",
+											"});\r",
+											"pm.test(\"Test list film with director response\", function () {\r",
+											"    pm.response.to.be.withBody;\r",
+											"    pm.response.to.be.json;\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.length, 'List length must be 2').to.eql(2);\r",
+											"});\r",
+											"pm.test(\"Test film[0] 'id' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[0]).to.have.property('id');\r",
+											"    pm.expect(jsonData[0].id, '\"id\" must be 3').to.eql(3);\r",
+											"});\r",
+											"pm.test(\"Test film[0] 'name' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[0]).to.have.property('name');\r",
+											"    pm.expect(jsonData[0].name, '\"name\" must be \"New film with director\"').to.eql('New film with director');\r",
+											"});\r",
+											"pm.test(\"Test film[0] 'description' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[0]).to.have.property('description');\r",
+											"    pm.expect(jsonData[0].description, '\"description\" must be \"Film with director\"').to.eql('Film with director');\r",
+											"});\r",
+											"pm.test(\"Test film[0] 'releaseDate' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[0]).to.have.property('releaseDate');\r",
+											"    pm.expect(jsonData[0].releaseDate, '\"releaseDate\" field must be \"1999-04-30\"').to.eql('1999-04-30');\r",
+											"});\r",
+											"pm.test(\"Test film[0] 'duration' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[0]).to.have.property('duration');\r",
+											"    pm.expect(jsonData[0].duration, '\"duration\" field must be 120').to.eql(120);    \r",
+											"});\r",
+											"pm.test(\"Test film[0] 'mpa' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[0]).to.have.property('mpa');\r",
+											"    pm.expect(jsonData[0].mpa).to.have.property('id');\r",
+											"    pm.expect(jsonData[0].mpa.id, '\"mpa.id\" field must be 3').to.eql(3);    \r",
+											"    pm.expect(jsonData[0].mpa).to.have.property('name');\r",
+											"    pm.expect(jsonData[0].mpa.name, '\"mpa.name\" field must be \"PG-13\"').to.eql(\"PG-13\");    \r",
+											"});\r",
+											"pm.test(\"Test film[0] 'genres' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    if (jsonData[0].genres != null) {\r",
+											"        pm.expect(jsonData[0].genres.length, '\"genres\" field must be have 1 genres').to.eql(1);\r",
+											"    }\r",
+											"});\r",
+											"pm.test(\"Test film[0] 'directors' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[0]).to.have.property('directors');\r",
+											"    pm.expect(jsonData[0].directors.length, '\"directors\" field must be have 1 director').to.eql(1);\r",
+											"    pm.expect(jsonData[0].directors[0]).to.have.property('id');\r",
+											"    pm.expect(jsonData[0].directors[0].id, '\"directors[0].id\" field must be 1').to.eql(1);    \r",
+											"    pm.expect(jsonData[0].directors[0]).to.have.property('name');\r",
+											"    pm.expect(jsonData[0].directors[0].name, '\"directors[0].name\" field must be \"Director updated\"').to.eql('Director updated');\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Test film[1] 'id' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('id');\r",
+											"    pm.expect(jsonData[1].id, '\"id\" must be 2').to.eql(2);\r",
+											"});\r",
+											"pm.test(\"Test film[1] 'name' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('name');\r",
+											"    pm.expect(jsonData[1].name, '\"name\" must be \"New film\"').to.eql('New film');\r",
+											"});\r",
+											"pm.test(\"Test film[1] 'description' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('description');\r",
+											"    pm.expect(jsonData[1].description, '\"description\" must be \"New film about friends\"').to.eql('New film about friends');\r",
+											"});\r",
+											"pm.test(\"Test film[1] 'releaseDate' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('releaseDate');\r",
+											"    pm.expect(jsonData[1].releaseDate, '\"releaseDate\" field must be \"1999-04-30\"').to.eql('1999-04-30');\r",
+											"});\r",
+											"pm.test(\"Test film[1] 'duration' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('duration');\r",
+											"    pm.expect(jsonData[1].duration, '\"duration\" field must be 120').to.eql(120);    \r",
+											"});\r",
+											"pm.test(\"Test film[1] 'mpa.id' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('mpa');\r",
+											"    pm.expect(jsonData[1].mpa).to.have.property('id');\r",
+											"    pm.expect(jsonData[1].mpa.id, '\"mpa.id\" field must be 3').to.eql(3);    \r",
+											"    pm.expect(jsonData[1].mpa).to.have.property('name');\r",
+											"    pm.expect(jsonData[1].mpa.name, '\"mpa.name\" field must be \"PG-13\"').to.eql(\"PG-13\");    \r",
+											"});\r",
+											"pm.test(\"Test film[1] 'genres' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('genres');\r",
+											"    pm.expect(jsonData[1].genres.length, '\"genres\" field must be have 2 genre').to.eql(2);\r",
+											"    pm.expect(jsonData[1].genres[0]).to.have.property('id');\r",
+											"    pm.expect(jsonData[1].genres[0].id, '\"genres[0].id\" field must be 1').to.eql(1);    \r",
+											"    pm.expect(jsonData[1].genres[0]).to.have.property('name');\r",
+											"    pm.expect(jsonData[1].genres[0].name, '\"genres[0].name\" field must be \"Комедия\"').to.eql('Комедия');\r",
+											"    pm.expect(jsonData[1].genres[1]).to.have.property('id');\r",
+											"    pm.expect(jsonData[1].genres[1].id, '\"genres[0].id\" field must be 2').to.eql(2);    \r",
+											"    pm.expect(jsonData[1].genres[1]).to.have.property('name');\r",
+											"    pm.expect(jsonData[1].genres[1].name, '\"genres[0].name\" field must be \"Драма\"').to.eql('Драма');\r",
+											"});\r",
+											"pm.test(\"Test film[1] 'directors' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('directors');\r",
+											"    pm.expect(jsonData[1].directors.length, '\"directors\" field must be have 1 director').to.eql(1);\r",
+											"    pm.expect(jsonData[1].directors[0]).to.have.property('id');\r",
+											"    pm.expect(jsonData[1].directors[0].id, '\"directors[0].id\" field must be 1').to.eql(1);    \r",
+											"    pm.expect(jsonData[1].directors[0]).to.have.property('name');\r",
+											"    pm.expect(jsonData[1].directors[0].name, '\"directors[0].name\" field must be \"Director updated\"').to.eql('Director updated');\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/films/director/:directorId?sortBy=likes",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"films",
+										"director",
+										":directorId"
+									],
+									"query": [
+										{
+											"key": "sortBy",
+											"value": "likes"
+										}
+									],
+									"variable": [
+										{
+											"key": "directorId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Film id=3 del Like from user id=2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.expect(pm.response.code).to.be.oneOf([200,204]);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/films/:id/like/:userId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"films",
+										":id",
+										"like",
+										":userId"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "3"
+										},
+										{
+											"key": "userId",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Film id=3 del Mark from user id=1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.expect(pm.response.code).to.be.oneOf([200,204]);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/films/:id/mark/:userId?value=6",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"films",
+										":id",
+										"mark",
+										":userId"
+									],
+									"query": [
+										{
+											"key": "value",
+											"value": "6"
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "3"
+										},
+										{
+											"key": "userId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get films with director=1 sort by marks",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.be.ok;\r",
+											"});\r",
+											"pm.test(\"Test list film with director response\", function () {\r",
+											"    pm.response.to.be.withBody;\r",
+											"    pm.response.to.be.json;\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.length, 'List length must be 2').to.eql(2);\r",
+											"});\r",
+											"pm.test(\"Test film[0] 'id' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[0]).to.have.property('id');\r",
+											"    pm.expect(jsonData[0].id, '\"id\" must be 2').to.eql(2);\r",
+											"});\r",
+											"pm.test(\"Test film[0] 'name' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[0]).to.have.property('name');\r",
+											"    pm.expect(jsonData[0].name, '\"New film\" must be \"New film with director\"').to.eql('New film');\r",
+											"});\r",
+											"pm.test(\"Test film[0] 'description' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[0]).to.have.property('description');\r",
+											"    pm.expect(jsonData[0].description, '\"description\" must be \"New film about friends\"').to.eql('New film about friends');\r",
+											"});\r",
+											"pm.test(\"Test film[0] 'releaseDate' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[0]).to.have.property('releaseDate');\r",
+											"    pm.expect(jsonData[0].releaseDate, '\"releaseDate\" field must be \"1999-04-30\"').to.eql('1999-04-30');\r",
+											"});\r",
+											"pm.test(\"Test film[0] 'duration' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[0]).to.have.property('duration');\r",
+											"    pm.expect(jsonData[0].duration, '\"duration\" field must be 120').to.eql(120);    \r",
+											"});\r",
+											"pm.test(\"Test film[0] 'mpa' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[0]).to.have.property('mpa');\r",
+											"    pm.expect(jsonData[0].mpa).to.have.property('id');\r",
+											"    pm.expect(jsonData[0].mpa.id, '\"mpa.id\" field must be 3').to.eql(3);    \r",
+											"    pm.expect(jsonData[0].mpa).to.have.property('name');\r",
+											"    pm.expect(jsonData[0].mpa.name, '\"mpa.name\" field must be \"PG-13\"').to.eql(\"PG-13\");    \r",
+											"});\r",
+											"pm.test(\"Test film[0] 'genres' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    if (jsonData[0].genres != null) {\r",
+											"        pm.expect(jsonData[0].genres.length, '\"genres\" field must be have 2 genres').to.eql(2);\r",
+											"    }\r",
+											"});\r",
+											"pm.test(\"Test film[0] 'directors' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[0]).to.have.property('directors');\r",
+											"    pm.expect(jsonData[0].directors.length, '\"directors\" field must be have 1 director').to.eql(1);\r",
+											"    pm.expect(jsonData[0].directors[0]).to.have.property('id');\r",
+											"    pm.expect(jsonData[0].directors[0].id, '\"directors[0].id\" field must be 1').to.eql(1);    \r",
+											"    pm.expect(jsonData[0].directors[0]).to.have.property('name');\r",
+											"    pm.expect(jsonData[0].directors[0].name, '\"directors[0].name\" field must be \"Director updated\"').to.eql('Director updated');\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Test film[1] 'id' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('id');\r",
+											"    pm.expect(jsonData[1].id, '\"id\" must be 3').to.eql(3);\r",
+											"});\r",
+											"pm.test(\"Test film[1] 'name' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('name');\r",
+											"    pm.expect(jsonData[1].name, '\"name\" must be \"New film with director\"').to.eql('New film with director');\r",
+											"});\r",
+											"pm.test(\"Test film[1] 'description' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('description');\r",
+											"    pm.expect(jsonData[1].description, '\"description\" must be \"Film with director\"').to.eql('Film with director');\r",
+											"});\r",
+											"pm.test(\"Test film[1] 'releaseDate' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('releaseDate');\r",
+											"    pm.expect(jsonData[1].releaseDate, '\"releaseDate\" field must be \"1999-04-30\"').to.eql('1999-04-30');\r",
+											"});\r",
+											"pm.test(\"Test film[1] 'duration' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('duration');\r",
+											"    pm.expect(jsonData[1].duration, '\"duration\" field must be 120').to.eql(120);    \r",
+											"});\r",
+											"pm.test(\"Test film[1] 'mpa.id' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('mpa');\r",
+											"    pm.expect(jsonData[1].mpa).to.have.property('id');\r",
+											"    pm.expect(jsonData[1].mpa.id, '\"mpa.id\" field must be 3').to.eql(3);    \r",
+											"    pm.expect(jsonData[1].mpa).to.have.property('name');\r",
+											"    pm.expect(jsonData[1].mpa.name, '\"mpa.name\" field must be \"PG-13\"').to.eql(\"PG-13\");    \r",
+											"});\r",
+											"pm.test(\"Test film[1] 'genres' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('genres');\r",
+											"    pm.expect(jsonData[1].genres.length, '\"genres\" field must be have 1 genre').to.eql(1);\r",
+											"    pm.expect(jsonData[1].genres[0]).to.have.property('id');\r",
+											"    pm.expect(jsonData[1].genres[0].id, '\"genres[0].id\" field must be 1').to.eql(1);    \r",
+											"});\r",
+											"pm.test(\"Test film[1] 'directors' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[1]).to.have.property('directors');\r",
+											"    pm.expect(jsonData[1].directors.length, '\"directors\" field must be have 1 director').to.eql(1);\r",
+											"    pm.expect(jsonData[1].directors[0]).to.have.property('id');\r",
+											"    pm.expect(jsonData[1].directors[0].id, '\"directors[0].id\" field must be 1').to.eql(1);    \r",
+											"    pm.expect(jsonData[1].directors[0]).to.have.property('name');\r",
+											"    pm.expect(jsonData[1].directors[0].name, '\"directors[0].name\" field must be \"Director updated\"').to.eql('Director updated');\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/films/director/:directorId?sortBy=likes",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"films",
+										"director",
+										":directorId"
+									],
+									"query": [
+										{
+											"key": "sortBy",
+											"value": "likes"
+										}
+									],
+									"variable": [
+										{
+											"key": "directorId",
+											"value": "1"
+										}
 									]
 								}
 							},
