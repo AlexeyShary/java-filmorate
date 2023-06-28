@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmSearchByMode;
@@ -59,12 +60,13 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/mark/{userId}")
-    public  void addMark(@PathVariable long id, @PathVariable long userId, @RequestParam int value) {
+    public void addMark(@PathVariable long id, @PathVariable long userId,
+                        @Valid @Range(min = 1, max = 10) @RequestParam int value) {
         filmService.addMark(id, userId, value);
     }
 
     @DeleteMapping("/{id}/mark/{userId}")
-    public  void deleteMark(@PathVariable long id, @PathVariable long userId) {
+    public void deleteMark(@PathVariable long id, @PathVariable long userId) {
         filmService.deleteMark(id, userId);
     }
 
