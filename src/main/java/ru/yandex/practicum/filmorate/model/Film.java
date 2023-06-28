@@ -12,6 +12,8 @@ import java.util.*;
 
 @Data
 public class Film {
+    private final static double LIKE_COST = 10;
+
     private long id;
     @NotBlank(message = "Имя фильма не должно быть пустым.")
     private String name;
@@ -44,6 +46,6 @@ public class Film {
         }
 
         int sumMarks = marks.stream().mapToInt(Integer::intValue).sum();
-        rating = (sumMarks + (likedUsersCount * 10)) / (double) totalMarks;
+        rating = (sumMarks + (likedUsersCount * LIKE_COST)) / (double) totalMarks;
     }
 }
