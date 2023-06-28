@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.storage.mark.MarkStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -112,7 +111,9 @@ public class FilmService {
         log.debug("Удалена оценка фильму {} от пользователя {}", id, userId);
     }
 
-    public Set<Film> getRecommendations(long userId) {
+    public Collection<Film> getRecommendations(long userId) {
+        return filmStorage.getRecommendations(userId);
+        /*
         Map<Long, List<Long>> filmsOfUsers = new HashMap<>();
         Collection<User> allUsers = userStorage.getAll();
         for (User user : allUsers) {
@@ -141,6 +142,7 @@ public class FilmService {
                 .filter(filmId -> !filmsOfUsers.get(userId).contains(filmId))
                 .map(filmStorage::get)
                 .collect(Collectors.toSet());
+         */
     }
 
     public Collection<Film> getDirectorFilmsSorted(long directorId, FilmSortByMode sortBy) {

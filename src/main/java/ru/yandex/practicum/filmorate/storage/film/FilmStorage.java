@@ -29,4 +29,6 @@ public interface FilmStorage {
     Collection<Film> getPopularFilms(long count);
 
     Collection<Film> getPopularFilmsByGenreAndYear(long count, Long genreId, Integer year);
+
+    Collection<Film> getRecommendations(long userId);
 }

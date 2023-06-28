@@ -252,6 +252,31 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(q, new FilmMapper(), paramsArr);
     }
 
+    public Collection<Film> getRecommendations(long userId) {
+        String q = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, F.DURATION, F.MPA_ID" +
+                " FROM FILMS F" +
+                " WHERE F.FILM_ID IN (" +
+                    " SELECT UFL.FILM_ID" +
+                    " FROM USERS_FILMS_LIKES UFL" +
+                    " WHERE UFL.USER_ID = (" +
+                        " SELECT UFL.USER_ID FROM USERS_FILMS_LIKES UFL" +
+                        " WHERE UFL.USER_ID <> ?" +
+                        " AND UFL.FILM_ID IN (" +
+                            " SELECT FILM_ID" +
+                            " FROM USERS_FILMS_LIKES" +
+                            " WHERE USER_ID = ?)" +
+                        " GROUP BY UFL.USER_ID" +
+                        " ORDER BY COUNT(*) DESC" +
+                        " LIMIT 1)" +
+                    ")" +
+                " AND F.FILM_ID NOT IN (" +
+                " SELECT FILM_ID" +
+                " FROM USERS_FILMS_LIKES" +
+                " WHERE USER_ID = ?)";
+
+        return jdbcTemplate.query(q, new FilmMapper(), userId, userId, userId);
+    }
+
     private void updateGenresSubtable(Film film) {
         String deleteGenresQuery = "DELETE FROM FILMS_GENRES WHERE FILM_ID = ?";
         jdbcTemplate.update(deleteGenresQuery, film.getId());
