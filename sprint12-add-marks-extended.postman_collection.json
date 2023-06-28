@@ -27171,7 +27171,7 @@
 							"response": []
 						},
 						{
-							"name": "Film id=2 get rating 10",
+							"name": "Film id=2 get rating 8",
 							"event": [
 								{
 									"listen": "test",
@@ -27192,7 +27192,7 @@
 											"pm.test(\"Test film 'rating' field\", function () {\r",
 											"    var jsonData = pm.response.json();\r",
 											"    pm.expect(jsonData).to.have.property('rating');\r",
-											"    pm.expect(jsonData.rating, '\"rating\" must be 10.0').to.eql(10.0);\r",
+											"    pm.expect(jsonData.rating, '\"rating\" must be 8.0').to.eql(8.0);\r",
 											"});"
 										],
 										"type": "text/javascript"
@@ -27284,7 +27284,7 @@
 							"response": []
 						},
 						{
-							"name": "Film id=2 get rating 5.5",
+							"name": "Film id=2 get rating 4.5",
 							"event": [
 								{
 									"listen": "test",
@@ -27305,7 +27305,7 @@
 											"pm.test(\"Test film 'rating' field\", function () {\r",
 											"    var jsonData = pm.response.json();\r",
 											"    pm.expect(jsonData).to.have.property('rating');\r",
-											"    pm.expect(jsonData.rating, '\"rating\" must be 5.5').to.eql(5.5);\r",
+											"    pm.expect(jsonData.rating, '\"rating\" must be 4.5').to.eql(4.5);\r",
 											"});"
 										],
 										"type": "text/javascript"
