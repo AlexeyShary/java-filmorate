@@ -34,11 +34,16 @@ public class Film {
         this.genres.addAll(genres);
     }
 
-    @JsonSetter
     public void setRating() {
-        OptionalDouble avgMark = marks.stream()
-                .mapToInt(Integer::intValue)
-                .average();
-        this.rating = avgMark.orElse(0);
+        int likedUsersCount = likedUsersIds.size();
+        int totalMarks = marks.size() + likedUsersCount;
+
+        if (totalMarks == 0) {
+            rating = 0;
+            return;
+        }
+
+        int sumMarks = marks.stream().mapToInt(Integer::intValue).sum();
+        rating = (sumMarks + (likedUsersCount * 10)) / (double) totalMarks;
     }
 }
