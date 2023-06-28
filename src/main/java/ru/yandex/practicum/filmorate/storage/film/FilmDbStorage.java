@@ -253,28 +253,40 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public Collection<Film> getRecommendations(long userId) {
-        String q = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, F.DURATION, F.MPA_ID" +
-                " FROM FILMS F" +
-                " WHERE F.FILM_ID IN (" +
-                    " SELECT UFL.FILM_ID" +
-                    " FROM USERS_FILMS_LIKES UFL" +
-                    " WHERE UFL.USER_ID = (" +
-                        " SELECT UFL.USER_ID FROM USERS_FILMS_LIKES UFL" +
-                        " WHERE UFL.USER_ID <> ?" +
-                        " AND UFL.FILM_ID IN (" +
-                            " SELECT FILM_ID" +
-                            " FROM USERS_FILMS_LIKES" +
-                            " WHERE USER_ID = ?)" +
-                        " GROUP BY UFL.USER_ID" +
-                        " ORDER BY COUNT(*) DESC" +
-                        " LIMIT 1)" +
-                    ")" +
-                " AND F.FILM_ID NOT IN (" +
-                " SELECT FILM_ID" +
-                " FROM USERS_FILMS_LIKES" +
-                " WHERE USER_ID = ?)";
+        String q =
+                " SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, F.DURATION, F.MPA_ID " +  // Выбираем фильмы
+                " FROM (" +                                                     // Из сводной таблицы
+                    " SELECT USER_ID, FILM_ID, MARK_VALUE FROM FILMS_MARKS" +   // Состоящей из записей с положительными оценками
+                    " WHERE MARK_VALUE > 5" +
+                    " UNION ALL" +
+                    " SELECT USER_ID, FILM_ID, 10 AS MARK_VALUE" +              // И лайков. Лайк заменяется на 10 баллов
+                    " FROM USERS_FILMS_LIKES) AS M" +
+                " JOIN FILMS AS F ON F.FILM_ID = M.FILM_ID" +                   // Добавляем сами фильмы чтобы эти данные передать в маппер
+                " WHERE USER_ID IN (" +                                         // Эти фильмы выбираем для пользователя-рекомендателя
+                    " SELECT USER_ID FROM (" +                                      // Определяем пользователя-рекомендателя
+                        " SELECT USER_ID, FILM_ID, MARK_VALUE FROM FILMS_MARKS" +   // Отбираем его из сводной таблицы всех положительных оценок
+                        " WHERE MARK_VALUE > 5" +
+                        " UNION ALL" +
+                        " SELECT USER_ID, FILM_ID, 10 AS MARK_VALUE" +
+                        " FROM USERS_FILMS_LIKES)" +
+                    " WHERE USER_ID <> ?" +                                      // Отбраковываем исходного пользователя
+                    " AND FILM_ID IN (" +                                        // Для остальных ищем пересечения с исходным пользователем
+                        " SELECT FILM_ID FROM FILMS_MARKS" +
+                        " WHERE MARK_VALUE > 5 AND USER_ID = ?" +
+                        " UNION ALL" +
+                        " SELECT FILM_ID AS MARK_VALUE FROM USERS_FILMS_LIKES" +
+                        " WHERE USER_ID = ?)" +
+                    " GROUP BY USER_ID" +                              // Группируем по USER_ID
+                    " ORDER BY COUNT(*) DESC" +                        // Считаем сколько у каждого претендента получилось общих положительных оценок
+                    " LIMIT 1)" +                                      // Забираем того у кого больше всех пересечений
+                " AND F.FILM_ID NOT IN (" +                              // Отбраковываем фильмы, которым исходный пользователь ставил лайки или оценки
+                    " SELECT FILM_ID FROM FILMS_MARKS" +
+                    " WHERE USER_ID = ?" +
+                    " UNION ALL" +
+                    " SELECT FILM_ID FROM USERS_FILMS_LIKES" +
+                    " WHERE USER_ID = ?)";
 
-        return jdbcTemplate.query(q, new FilmMapper(), userId, userId, userId);
+        return jdbcTemplate.query(q, new FilmMapper(), userId, userId, userId, userId, userId);
     }
 
     private void updateGenresSubtable(Film film) {
