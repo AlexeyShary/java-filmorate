@@ -2,13 +2,9 @@ package ru.yandex.practicum.filmorate.storage.mark;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
-import ru.yandex.practicum.filmorate.model.Mark;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 
 @Component
@@ -34,20 +30,8 @@ public class MarkDbStorage implements MarkStorage {
     }
 
     @Override
-    public Collection<Mark> getAllMarksOfFilm(long filmId) {
-        String q = "SELECT * FROM FILMS_MARKS WHERE FILM_ID = ?";
-        return jdbcTemplate.query(q, new MarkMapper(), filmId);
-    }
-
-    private static class MarkMapper implements RowMapper<Mark> {
-        @Override
-        public Mark mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Mark mark = new Mark();
-            mark.setUserId(rs.getLong("USER_ID"));
-            mark.setFilmId(rs.getLong("FILM_ID"));
-            mark.setValue(rs.getInt("MARK_VALUE"));
-
-            return mark;
-        }
+    public Collection<Integer> getAllMarksOfFilm(long filmId) {
+        String q = "SELECT MARK_VALUE FROM FILMS_MARKS WHERE FILM_ID = ?";
+        return jdbcTemplate.queryForList(q, Integer.class, filmId);
     }
 }

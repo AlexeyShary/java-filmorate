@@ -25,7 +25,7 @@ public class Film {
     private Set<Genre> genres = new TreeSet<>(Comparator.comparingLong(Genre::getId));
     private Mpa mpa;
     private List<Director> directors = new ArrayList<>();
-    private Set<Mark> marks = new HashSet<>();
+    private List<Integer> marks = new ArrayList<>();
     private double rating;
 
     @JsonSetter
@@ -37,7 +37,7 @@ public class Film {
     @JsonSetter
     public void setRating() {
         OptionalDouble avgMark = marks.stream()
-                .mapToDouble(Mark::getValue)
+                .mapToInt(Integer::intValue)
                 .average();
         this.rating = avgMark.orElse(0);
     }
