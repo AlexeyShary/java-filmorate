@@ -53,11 +53,9 @@ public class FilmService {
 
     public Collection<Film> getPopular(long count, Long genreId, Integer year) {
         if (genreId == null && year == null) {
-            Collection<Long> popular = likesStorage.getPopularFilmsIds(count);
-            return filmStorage.getFilmsByListIds(popular);
+            return filmStorage.getPopularFilms(count);
         } else {
-            Collection<Long> popularWithGenreAndYear = likesStorage.getFilmsIdsByGenreAndYear(count, genreId, year);
-            return filmStorage.getFilmsByListIds(popularWithGenreAndYear);
+            return filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
         }
     }
 

@@ -21,10 +21,7 @@ import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -200,6 +197,51 @@ public class FilmDbStorage implements FilmStorage {
             default:
                 throw new IllegalArgumentException("Передан некорректный параметр сортировки " + sortBy);
         }
+    }
+
+    @Override
+    public Collection<Film> getPopularFilms(long count) {
+        String q = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, F.DURATION, F.MPA_ID," +
+                " AVG(CASE WHEN L.USER_ID IS NOT NULL THEN 10 ELSE M.MARK_VALUE END) AS RATING" +
+                " FROM FILMS F" +
+                " LEFT JOIN FILMS_MARKS M ON F.FILM_ID = M.FILM_ID" +
+                " LEFT JOIN USERS_FILMS_LIKES L ON F.FILM_ID = L.FILM_ID" +
+                " GROUP BY F.FILM_ID, F.FILM_NAME" +
+                " ORDER BY RATING DESC" +
+                " LIMIT ?";
+
+        return jdbcTemplate.query(q, new FilmMapper(), count);
+    }
+
+    @Override
+    public Collection<Film> getPopularFilmsByGenreAndYear(long count, Long genreId, Integer year) {
+        String q = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, F.DURATION, F.MPA_ID," +
+                " AVG(CASE WHEN L.USER_ID IS NOT NULL THEN 10 ELSE M.MARK_VALUE END) AS RATING" +
+                " FROM FILMS F" +
+                " INNER JOIN FILMS_GENRES FG ON F.FILM_ID = FG.FILM_ID" +
+                " LEFT JOIN FILMS_MARKS M ON F.FILM_ID = M.FILM_ID" +
+                " LEFT JOIN USERS_FILMS_LIKES L ON F.FILM_ID = L.FILM_ID" +
+                " WHERE 1=1";
+
+        List<Object> paramsList = new ArrayList<>();
+        if (genreId != null) {
+            q += " AND FG.GENRE_ID = ?";
+            paramsList.add(genreId);
+        }
+        if (year != null) {
+            q += " AND YEAR(F.RELEASE_DATE) = ?";
+            paramsList.add(year);
+        }
+
+        q +=    " GROUP BY F.FILM_ID, F.FILM_NAME" +
+                " ORDER BY RATING DESC" +
+                " LIMIT ?";
+
+        paramsList.add(count);
+
+        Object[] paramsArr = paramsList.toArray();
+
+        return jdbcTemplate.query(q, new FilmMapper(), paramsArr);
     }
 
     private void updateGenresSubtable(Film film) {
