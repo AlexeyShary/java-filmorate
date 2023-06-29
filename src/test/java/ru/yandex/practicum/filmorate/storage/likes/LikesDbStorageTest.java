@@ -42,11 +42,11 @@ class LikesDbStorageTest {
 
     @Test
     void getPopularFilmsIds() {
-        List<Long> popularFilmsIds = filmDbStorage.getPopularFilms(2)
+        List<Long> popularFilmsIds = filmDbStorage.getPopularFilms(1)
                 .stream()
                 .map(Film::getId)
                 .collect(Collectors.toList());
-        List<Long> expectedIds = Arrays.asList(2L, 3L);
+        List<Long> expectedIds = Arrays.asList(1L);
 
         Assertions.assertThat(popularFilmsIds).containsAll(expectedIds);
     }
