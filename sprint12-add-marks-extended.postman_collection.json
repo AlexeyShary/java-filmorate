@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "cd96e829-c94f-4403-a9b7-37897bd7a3e4",
+		"_postman_id": "068b4a15-01f0-4642-bd6d-93c77717bd74",
 		"name": "sprint12/add-marks-extended",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "26980576"
+		"_exporter_id": "26948900"
 	},
 	"item": [
 		{
@@ -27566,7 +27566,7 @@
 					"name": "popular-films-by-rating",
 					"item": [
 						{
-							"name": "Film id=1 add Mark 8 from user id=1",
+							"name": "Film id=1 add Mark 7 from user id=1",
 							"event": [
 								{
 									"listen": "test",
@@ -27589,7 +27589,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/films/:id/mark/:userId?value=8",
+									"raw": "{{baseUrl}}/films/:id/mark/:userId?value=7",
 									"host": [
 										"{{baseUrl}}"
 									],
@@ -27602,7 +27602,7 @@
 									"query": [
 										{
 											"key": "value",
-											"value": "8"
+											"value": "7"
 										}
 									],
 									"variable": [
@@ -27642,8 +27642,10 @@
 											"    return item.id;\r",
 											"});\r",
 											"\r",
-											"// Проверка равенства ожидаемого и полученного порядка идентификаторов\r",
-											"pm.expect(actualIds).to.eql(expectedIds);"
+											"pm.test(\"Test film order 3-1-2\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(actualIds).to.eql(expectedIds);\r",
+											"});"
 										],
 										"type": "text/javascript"
 									}
@@ -27747,8 +27749,10 @@
 											"    return item.id;\r",
 											"});\r",
 											"\r",
-											"// Проверка равенства ожидаемого и полученного порядка идентификаторов\r",
-											"pm.expect(actualIds).to.eql(expectedIds);"
+											"pm.test(\"Test film order 3-1-2\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(actualIds).to.eql(expectedIds);\r",
+											"});"
 										],
 										"type": "text/javascript"
 									}
@@ -28264,6 +28268,646 @@
 								}
 							},
 							"response": []
+						}
+					]
+				},
+				{
+					"name": "recomendation-by-marks-test",
+					"item": [
+						{
+							"name": "User id=5 create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 or 201\", function () {\r",
+											"    pm.expect(pm.response.code).to.be.oneOf([200,201]);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"login\": \"recomendUser\",\n  \"name\": \"recomend user\",\n  \"email\": \"recomend@user.ru\",\n  \"birthday\": \"1976-08-20\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/users",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Film id=5 create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 or 201\", function () {\r",
+											"    pm.expect(pm.response.code).to.be.oneOf([200,201]);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"New film for recomend\",\n  \"releaseDate\": \"1999-04-30\",\n  \"description\": \"New film about recomendations\",\n  \"duration\": 120,\n  \"rate\": 4,\n  \"mpa\": { \"id\": 3},\n  \"genres\": [{ \"id\": 1}]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/films",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"films"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Film id=6 create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 or 201\", function () {\r",
+											"    pm.expect(pm.response.code).to.be.oneOf([200,201]);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"New film for recomend 2\",\n  \"releaseDate\": \"1999-04-30\",\n  \"description\": \"New film about recomendations 2\",\n  \"duration\": 120,\n  \"rate\": 4,\n  \"mpa\": { \"id\": 3},\n  \"genres\": [{ \"id\": 1}]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/films",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"films"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Film id=1 add Like from user id=5",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.expect(pm.response.code).to.be.oneOf([200,204]);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/films/:id/like/:userId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"films",
+										":id",
+										"like",
+										":userId"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1",
+											"description": "(Required) "
+										},
+										{
+											"key": "userId",
+											"value": "5",
+											"description": "(Required) "
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Film id=3 add Like from user id=1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.expect(pm.response.code).to.be.oneOf([200,204]);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/films/:id/like/:userId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"films",
+										":id",
+										"like",
+										":userId"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "3",
+											"description": "(Required) "
+										},
+										{
+											"key": "userId",
+											"value": "1",
+											"description": "(Required) "
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Film id=2 add Mark 8 from user id=5",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.expect(pm.response.code).to.be.oneOf([200,204]);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/films/:id/mark/:userId?value=8",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"films",
+										":id",
+										"mark",
+										":userId"
+									],
+									"query": [
+										{
+											"key": "value",
+											"value": "8"
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "2",
+											"description": "(Required) "
+										},
+										{
+											"key": "userId",
+											"value": "5",
+											"description": "(Required) "
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Film id=3 add Mark 6 from user id=5",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.expect(pm.response.code).to.be.oneOf([200,204]);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/films/:id/mark/:userId?value=6",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"films",
+										":id",
+										"mark",
+										":userId"
+									],
+									"query": [
+										{
+											"key": "value",
+											"value": "6"
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "3",
+											"description": "(Required) "
+										},
+										{
+											"key": "userId",
+											"value": "5",
+											"description": "(Required) "
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Film id=5 add Mark 5 from user id=5",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.expect(pm.response.code).to.be.oneOf([200,204]);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/films/:id/mark/:userId?value=5",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"films",
+										":id",
+										"mark",
+										":userId"
+									],
+									"query": [
+										{
+											"key": "value",
+											"value": "5"
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "5",
+											"description": "(Required) "
+										},
+										{
+											"key": "userId",
+											"value": "5",
+											"description": "(Required) "
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Film id=6 add Mark 8 from user id=5",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.expect(pm.response.code).to.be.oneOf([200,204]);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/films/:id/mark/:userId?value=8",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"films",
+										":id",
+										"mark",
+										":userId"
+									],
+									"query": [
+										{
+											"key": "value",
+											"value": "8"
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "6",
+											"description": "(Required) "
+										},
+										{
+											"key": "userId",
+											"value": "5",
+											"description": "(Required) "
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "User id=1 Get film recommendations  from user id=5",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.be.ok;\r",
+											"});\r",
+											"pm.test(\"Test list film recommendations response\", function () {\r",
+											"    pm.response.to.be.withBody;\r",
+											"    pm.response.to.be.json;\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.length, 'List length must be 1').to.eql(1);\r",
+											"});\r",
+											"pm.test(\"Test film[0] 'id' field\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData[0]).to.have.property('id');\r",
+											"    pm.expect(jsonData[0].id, '\"id\" must be 6').to.eql(6);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/:userId/recommendations",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										":userId",
+										"recommendations"
+									],
+									"variable": [
+										{
+											"key": "userId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/films/popular",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"films",
+												"popular"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Not Found",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/films/popular",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"films",
+												"popular"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Conflict",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/films/popular",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"films",
+												"popular"
+											]
+										}
+									},
+									"status": "Conflict",
+									"code": 409,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Internal Server Error",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/films/popular",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"films",
+												"popular"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								}
+							]
 						}
 					]
 				}
