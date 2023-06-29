@@ -12,7 +12,7 @@ import java.util.*;
 
 @Data
 public class Film {
-    public final static double LIKE_COST = 8;
+    public static final double LIKE_COST = 8;
 
     private long id;
     @NotBlank(message = "Имя фильма не должно быть пустым.")
