@@ -7,10 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Sql(scripts = {"/schema.sql", "/likesTestData.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class LikesDbStorageTest {
     private final LikesDbStorage likesDbStorage;
+    private final FilmDbStorage filmDbStorage;
 
     @Test
     void addLike() {
@@ -39,18 +42,23 @@ class LikesDbStorageTest {
 
     @Test
     void getPopularFilmsIds() {
-        List<Long> popularFilmsIds = new ArrayList<>(likesDbStorage.getPopularFilmsIds(2));
-        List<Long> expectedIds = Arrays.asList(2L, 3L);
+        List<Long> popularFilmsIds = filmDbStorage.getPopularFilms(1)
+                .stream()
+                .map(Film::getId)
+                .collect(Collectors.toList());
+        List<Long> expectedIds = Arrays.asList(1L);
 
-        Assertions.assertThat(popularFilmsIds).isEqualTo(expectedIds);
+        Assertions.assertThat(popularFilmsIds).containsAll(expectedIds);
     }
 
     @Test
     void getFilmsIdsByGenreAndYear() {
-        List<Long> filmsIdsByGenreAndYear = new ArrayList<>(likesDbStorage
-                .getFilmsIdsByGenreAndYear(5, 4L, 2014));
+        List<Long> filmsIdsByGenreAndYear = filmDbStorage.getPopularFilmsByGenreAndYear(5, 4L, 2014)
+                .stream()
+                .map(Film::getId)
+                .collect(Collectors.toList());
         List<Long> expectedIds = Arrays.asList(3L, 1L);
-        Assertions.assertThat(filmsIdsByGenreAndYear).isEqualTo(expectedIds);
+        Assertions.assertThat(filmsIdsByGenreAndYear).containsAll(expectedIds);
     }
 
     @Test

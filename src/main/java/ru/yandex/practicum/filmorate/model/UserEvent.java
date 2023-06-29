@@ -20,6 +20,7 @@ public class UserEvent {
     public enum EventType {
         LIKE,
         REVIEW,
-        FRIEND
+        FRIEND,
+        MARK
     }
 }

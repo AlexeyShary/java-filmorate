@@ -7,10 +7,6 @@ public interface LikesStorage {
 
     void deleteLike(long userId, long filmId);
 
-    Collection<Long> getPopularFilmsIds(long count);
-
-    Collection<Long> getFilmsIdsByGenreAndYear(long count, Long genreId, Integer year);
-
     Collection<Long> getLikedUsersIds(long filmId);
 
     Collection<Long> getCommonFilmsIds(long userId, long friendId);
