@@ -12,6 +12,8 @@ import java.util.*;
 
 @Data
 public class Film {
+    public static final double LIKE_COST = 8;
+
     private long id;
     @NotBlank(message = "Имя фильма не должно быть пустым.")
     private String name;
@@ -25,10 +27,25 @@ public class Film {
     private Set<Genre> genres = new TreeSet<>(Comparator.comparingLong(Genre::getId));
     private Mpa mpa;
     private List<Director> directors = new ArrayList<>();
+    private List<Integer> marks = new ArrayList<>();
+    private double rating;
 
     @JsonSetter
     public void setGenres(Set<Genre> genres) {
         this.genres.clear();
         this.genres.addAll(genres);
+    }
+
+    public void setRating() {
+        int likedUsersCount = likedUsersIds.size();
+        int totalMarks = marks.size() + likedUsersCount;
+
+        if (totalMarks == 0) {
+            rating = 0;
+            return;
+        }
+
+        int sumMarks = marks.stream().mapToInt(Integer::intValue).sum();
+        rating = (sumMarks + (likedUsersCount * LIKE_COST)) / (double) totalMarks;
     }
 }

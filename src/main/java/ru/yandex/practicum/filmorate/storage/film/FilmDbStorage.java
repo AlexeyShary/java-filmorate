@@ -12,14 +12,11 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.FilmSortByMode;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
+import ru.yandex.practicum.filmorate.storage.mark.MarkStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.sql.ResultSet;
@@ -40,6 +37,9 @@ public class FilmDbStorage implements FilmStorage {
 
     @Qualifier("likesDbStorage")
     private final LikesStorage likesStorage;
+
+    @Qualifier("markDbStorage")
+    private final MarkStorage markStorage;
 
     @Override
     public Collection<Film> getAll() {
@@ -181,22 +181,121 @@ public class FilmDbStorage implements FilmStorage {
                 " WHERE DIRECTOR_ID = ?" +
                 " ORDER BY YEAR(f.RELEASE_DATE)";
 
-        String sortByLikesQuery = "SELECT f.*, m.MPA_NAME," +
-                " (SELECT COUNT(*) FROM USERS_FILMS_LIKES ufl WHERE fd.FILM_ID = ufl.FILM_ID) AS LIKES" +
-                " FROM FILMS_DIRECTORS fd" +
-                " JOIN FILMS f ON fd.FILM_ID = f.FILM_ID" +
-                " JOIN MPA m ON f.MPA_ID = m.MPA_ID" +
+        String sortByLikesOrRatingQuery = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION," +
+                " F.RELEASE_DATE, F.DURATION, F.MPA_ID, M.MPA_NAME," +
+                " CASE " +
+                " WHEN COUNT(M.MARK_VALUE) + COUNT(L.USER_ID) = 0 THEN 0" +
+                " WHEN COUNT(M.MARK_VALUE) = 0 THEN " + Film.LIKE_COST +
+                " ELSE (COALESCE(SUM(M.MARK_VALUE), 0) + (COUNT(L.USER_ID) * " + Film.LIKE_COST + ")) / (COUNT(M.MARK_VALUE) + COUNT(L.USER_ID))" +
+                " END AS RATING" +
+                " FROM FILMS F" +
+                " LEFT JOIN FILMS_MARKS M ON F.FILM_ID = M.FILM_ID" +
+                " LEFT JOIN USERS_FILMS_LIKES L ON F.FILM_ID = L.FILM_ID" +
+                " LEFT JOIN FILMS_DIRECTORS FD ON F.FILM_ID = FD.FILM_ID" +
+                " LEFT JOIN MPA M ON F.MPA_ID = M.MPA_ID" +
                 " WHERE DIRECTOR_ID = ?" +
-                " ORDER BY LIKES DESC";
+                " GROUP BY F.FILM_ID" +
+                " ORDER BY RATING DESC";
 
         switch (sortBy) {
             case YEAR:
                 return jdbcTemplate.query(sortByYearQuery, new FilmMapper(), directorId);
             case LIKES:
-                return jdbcTemplate.query(sortByLikesQuery, new FilmMapper(), directorId);
+            case RATING:
+                return jdbcTemplate.query(sortByLikesOrRatingQuery, new FilmMapper(), directorId);
             default:
                 throw new IllegalArgumentException("Передан некорректный параметр сортировки " + sortBy);
         }
+    }
+
+    @Override
+    public Collection<Film> getPopularFilms(long count) {
+        String q = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, F.DURATION, F.MPA_ID," +
+                " CASE " +
+                " WHEN COUNT(M.MARK_VALUE) + COUNT(L.USER_ID) = 0 THEN 0" +
+                " WHEN COUNT(M.MARK_VALUE) = 0 THEN " + Film.LIKE_COST +
+                " ELSE (COALESCE(SUM(M.MARK_VALUE), 0) + (COUNT(L.USER_ID) * " + Film.LIKE_COST + ")) / (COUNT(M.MARK_VALUE) + COUNT(L.USER_ID))" +
+                " END AS RATING" +
+                " FROM FILMS F" +
+                " LEFT JOIN FILMS_MARKS M ON F.FILM_ID = M.FILM_ID" +
+                " LEFT JOIN USERS_FILMS_LIKES L ON F.FILM_ID = L.FILM_ID" +
+                " GROUP BY F.FILM_ID, F.FILM_NAME" +
+                " ORDER BY RATING DESC" +
+                " LIMIT ?";
+
+        return jdbcTemplate.query(q, new FilmMapper(), count);
+    }
+
+    @Override
+    public Collection<Film> getPopularFilmsByGenreAndYear(long count, Long genreId, Integer year) {
+        String q = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, F.DURATION, F.MPA_ID," +
+                " CASE " +
+                " WHEN COUNT(M.MARK_VALUE) + COUNT(L.USER_ID) = 0 THEN 0" +
+                " WHEN COUNT(M.MARK_VALUE) = 0 THEN " + Film.LIKE_COST +
+                " ELSE (COALESCE(SUM(M.MARK_VALUE), 0) + (COUNT(L.USER_ID) * " + Film.LIKE_COST + ")) / (COUNT(M.MARK_VALUE) + COUNT(L.USER_ID))" +
+                " END AS RATING" +
+                " FROM FILMS F" +
+                " INNER JOIN FILMS_GENRES FG ON F.FILM_ID = FG.FILM_ID" +
+                " LEFT JOIN FILMS_MARKS M ON F.FILM_ID = M.FILM_ID" +
+                " LEFT JOIN USERS_FILMS_LIKES L ON F.FILM_ID = L.FILM_ID" +
+                " WHERE 1=1";
+
+        List<Object> paramsList = new ArrayList<>();
+        if (genreId != null) {
+            q += " AND FG.GENRE_ID = ?";
+            paramsList.add(genreId);
+        }
+        if (year != null) {
+            q += " AND YEAR(F.RELEASE_DATE) = ?";
+            paramsList.add(year);
+        }
+
+        q += " GROUP BY F.FILM_ID, F.FILM_NAME" +
+                " ORDER BY RATING DESC" +
+                " LIMIT ?";
+
+        paramsList.add(count);
+
+        Object[] paramsArr = paramsList.toArray();
+
+        return jdbcTemplate.query(q, new FilmMapper(), paramsArr);
+    }
+
+    public Collection<Film> getRecommendations(long userId) {
+        String q =
+                " SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, F.DURATION, F.MPA_ID " +  // Выбираем фильмы
+                        " FROM (" +                                                     // Из сводной таблицы
+                        " SELECT USER_ID, FILM_ID, MARK_VALUE FROM FILMS_MARKS" +   // Состоящей из записей с положительными оценками
+                        " WHERE MARK_VALUE > 5" +
+                        " UNION ALL" +
+                        " SELECT USER_ID, FILM_ID, 10 AS MARK_VALUE" +              // И лайков. Лайк заменяется на 10 баллов
+                        " FROM USERS_FILMS_LIKES) AS M" +
+                        " JOIN FILMS AS F ON F.FILM_ID = M.FILM_ID" +                   // Добавляем сами фильмы чтобы эти данные передать в маппер
+                        " WHERE USER_ID IN (" +                                         // Эти фильмы выбираем для пользователя-рекомендателя
+                        " SELECT USER_ID FROM (" +                                      // Определяем пользователя-рекомендателя
+                        " SELECT USER_ID, FILM_ID, MARK_VALUE FROM FILMS_MARKS" +   // Отбираем его из сводной таблицы всех положительных оценок
+                        " WHERE MARK_VALUE > 5" +
+                        " UNION ALL" +
+                        " SELECT USER_ID, FILM_ID, 10 AS MARK_VALUE" +
+                        " FROM USERS_FILMS_LIKES)" +
+                        " WHERE USER_ID <> ?" +                                      // Отбраковываем исходного пользователя
+                        " AND FILM_ID IN (" +                                        // Для остальных ищем пересечения с исходным пользователем
+                        " SELECT FILM_ID FROM FILMS_MARKS" +
+                        " WHERE MARK_VALUE > 5 AND USER_ID = ?" +
+                        " UNION ALL" +
+                        " SELECT FILM_ID AS MARK_VALUE FROM USERS_FILMS_LIKES" +
+                        " WHERE USER_ID = ?)" +
+                        " GROUP BY USER_ID" +                              // Группируем по USER_ID
+                        " ORDER BY COUNT(*) DESC" +                        // Считаем сколько у каждого претендента получилось общих положительных оценок
+                        " LIMIT 1)" +                                      // Забираем того у кого больше всех пересечений
+                        " AND F.FILM_ID NOT IN (" +                              // Отбраковываем фильмы, которым исходный пользователь ставил лайки или оценки
+                        " SELECT FILM_ID FROM FILMS_MARKS" +
+                        " WHERE USER_ID = ?" +
+                        " UNION ALL" +
+                        " SELECT FILM_ID FROM USERS_FILMS_LIKES" +
+                        " WHERE USER_ID = ?)";
+
+        return jdbcTemplate.query(q, new FilmMapper(), userId, userId, userId, userId, userId);
     }
 
     private void updateGenresSubtable(Film film) {
@@ -230,6 +329,8 @@ public class FilmDbStorage implements FilmStorage {
             film.setDuration(rs.getInt("DURATION"));
             film.setMpa(mpaStorage.get(rs.getLong("MPA_ID")));
             film.getLikedUsersIds().addAll(likesStorage.getLikedUsersIds(film.getId()));
+            film.getMarks().addAll(markStorage.getAllMarksOfFilm(film.getId()));
+            film.setRating();
 
             String genresQuery = "SELECT GENRE_ID FROM FILMS_GENRES WHERE FILM_ID = ?";
             List<Long> genresIds = jdbcTemplate.queryForList(genresQuery, Long.class, film.getId());

@@ -5,17 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.FilmSortByMode;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.UserEvent;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
+import ru.yandex.practicum.filmorate.storage.mark.MarkStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,6 +28,9 @@ public class FilmService {
 
     @Qualifier("userEventService")
     private final UserEventService userEventService;
+
+    @Qualifier("markDbStorage")
+    private final MarkStorage markStorage;
 
     public Collection<Film> getAll() {
         return filmStorage.getAll();
@@ -53,11 +52,9 @@ public class FilmService {
 
     public Collection<Film> getPopular(long count, Long genreId, Integer year) {
         if (genreId == null && year == null) {
-            Collection<Long> popular = likesStorage.getPopularFilmsIds(count);
-            return filmStorage.getFilmsByListIds(popular);
+            return filmStorage.getPopularFilms(count);
         } else {
-            Collection<Long> popularWithGenreAndYear = likesStorage.getFilmsIdsByGenreAndYear(count, genreId, year);
-            return filmStorage.getFilmsByListIds(popularWithGenreAndYear);
+            return filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
         }
     }
 
@@ -85,6 +82,13 @@ public class FilmService {
         log.debug("Добавлен лайк фильму {} от пользователя {}", id, userId);
     }
 
+    public void addMark(long id, long userId, int value) {
+        markStorage.addMark(userId, id, value);
+        userEventService.create(userId, id, UserEvent.EventType.MARK, UserEvent.EventOperation.ADD);
+
+        log.debug("Добавлена оценка {} фильму {} от пользователя {}", value, id, userId);
+    }
+
     public void deleteLike(long id, long userId) {
         Film film = get(id);
         User user = userStorage.get(userId);
@@ -100,35 +104,15 @@ public class FilmService {
         log.debug("Удален лайк фильму {} от пользователя {}", id, userId);
     }
 
-    public Set<Film> getRecommendations(long userId) {
-        Map<Long, List<Long>> filmsOfUsers = new HashMap<>();
-        Collection<User> allUsers = userStorage.getAll();
-        for (User user : allUsers) {
-            filmsOfUsers.put(user.getId(), filmStorage.getUsersLikedFilmsIds(user.getId()));
-        }
-        long maxIntersection = 0;
-        Set<Long> intersection = new HashSet<>();
-        for (Long id : filmsOfUsers.keySet()) {
-            if (id == userId) continue;
+    public void deleteMark(long id, long userId) {
+        markStorage.deleteMark(userId, id);
+        userEventService.create(userId, id, UserEvent.EventType.MARK, UserEvent.EventOperation.REMOVE);
 
-            long numOfIntersection = filmsOfUsers.get(id).stream()
-                    .filter(filmId -> filmsOfUsers.get(userId).contains(filmId)).count();
+        log.debug("Удалена оценка фильму {} от пользователя {}", id, userId);
+    }
 
-            if (numOfIntersection == maxIntersection & numOfIntersection != 0) {
-                intersection.add(id);
-            }
-
-            if (numOfIntersection > maxIntersection) {
-                maxIntersection = numOfIntersection;
-                intersection = new HashSet<>();
-                intersection.add(id);
-            }
-        }
-        if (maxIntersection == 0) return new HashSet<>();
-        else return intersection.stream().flatMap(idUser -> filmStorage.getUsersLikedFilmsIds(idUser).stream())
-                .filter(filmId -> !filmsOfUsers.get(userId).contains(filmId))
-                .map(filmStorage::get)
-                .collect(Collectors.toSet());
+    public Collection<Film> getRecommendations(long userId) {
+        return filmStorage.getRecommendations(userId);
     }
 
     public Collection<Film> getDirectorFilmsSorted(long directorId, FilmSortByMode sortBy) {
